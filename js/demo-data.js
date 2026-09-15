@@ -1,0 +1,68 @@
+// Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
+// En production ces données vivent dans Supabase (voir supabase/schema.sql).
+window.BIANCHI_DEMO = {
+  parametres: {
+    id: 1,
+    nom: "Bianchi Dessert",
+    slogan: "Per l'amor del gusto",
+    whatsapp: "212600000000",
+    adresse: "Tétouan",
+    lien_maps: "",
+    horaires: "Commandes tous les jours · 10h00 – 22h00",
+    delai_texte: "Retrait ou livraison le jour même selon le stock",
+    commandes_ouvertes: true,
+    message_ferme: "Les commandes reprennent demain matin. À très vite !",
+    livraison_active: true,
+    frais_livraison: 10,
+    livraison_offerte_des: 80,
+    commande_min: 0,
+    annonce: "Nouveau : commandez en ligne, le stock affiché est celui du jour · Livraison à Tétouan · Paiement à la réception",
+  },
+  categories: [
+    { id: 1, nom: "Charlottes", emoji: "🍎", sous_titre: "La pièce signature, à partager", ordre: 1, actif: true },
+    { id: 2, nom: "Beignets", emoji: "🍩", sous_titre: "Moelleux, garnis à la commande", ordre: 2, actif: true },
+    { id: 3, nom: "Cookies & Biscuits", emoji: "🍪", sous_titre: "Croustillants dehors, fondants dedans", ordre: 3, actif: true },
+    { id: 4, nom: "Tiramisù & Mousses", emoji: "🍰", sous_titre: "En verrine individuelle", ordre: 4, actif: true },
+    { id: 5, nom: "Cheesecakes", emoji: "🧁", sous_titre: "Base biscuitée, crème onctueuse", ordre: 5, actif: true },
+    { id: 6, nom: "Glaces & Cookies glacés", emoji: "🍨", sous_titre: "Préparés à la commande, toujours disponibles", ordre: 6, actif: true },
+  ],
+  produits: [
+    { id: "p01", categorie_id: 1, nom: "Charlotte aux pommes cannelle", description: "Biscuits cuillère, compotée de pommes à la cannelle et crème légère.", prix: 30, ancien_prix: null, promo_label: "Best-seller", stock: 4, suivre_stock: true, image_url: "", actif: true, ordre: 1, vedette: true },
+
+    { id: "p02", categorie_id: 2, nom: "Mini Beignet Pomme", description: "Beignet moelleux garni de compotée de pommes.", prix: 8, ancien_prix: null, promo_label: "", stock: 3, suivre_stock: true, image_url: "", actif: true, ordre: 1 },
+    { id: "p03", categorie_id: 2, nom: "Mini Beignet Nutella", description: "Beignet moelleux, cœur Nutella généreux.", prix: 8, ancien_prix: null, promo_label: "", stock: 8, suivre_stock: true, image_url: "", actif: true, ordre: 2 },
+    { id: "p04", categorie_id: 2, nom: "Mini Beignet Spéculoos", description: "Beignet moelleux, crème de spéculoos.", prix: 8, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 3 },
+    { id: "p05", categorie_id: 2, nom: "Mini Beignet Bueno", description: "Beignet moelleux, crème noisette façon Bueno.", prix: 8, ancien_prix: null, promo_label: "", stock: 2, suivre_stock: true, image_url: "", actif: true, ordre: 4 },
+    { id: "p06", categorie_id: 2, nom: "Mini Beignet Pistache", description: "Beignet moelleux, crème de pistache.", prix: 13, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 5 },
+    { id: "p07", categorie_id: 2, nom: "Mini Beignet Framboise", description: "Beignet moelleux, confit de framboise.", prix: 13, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 6 },
+    { id: "p08", categorie_id: 2, nom: "Gros Beignet Nutella", description: "Le grand format, généreusement garni de Nutella.", prix: 15, ancien_prix: null, promo_label: "", stock: 2, suivre_stock: true, image_url: "", actif: true, ordre: 7 },
+
+    { id: "p09", categorie_id: 3, nom: "Palet Breton", description: "Sablé pur beurre, épais et friable.", prix: 15, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 1 },
+    { id: "p10", categorie_id: 3, nom: "Cookie 3 Chocolats", description: "Chocolat noir, lait et blanc dans une pâte fondante.", prix: 25, ancien_prix: null, promo_label: "", stock: 4, suivre_stock: true, image_url: "", actif: true, ordre: 2 },
+    { id: "p11", categorie_id: 3, nom: "Cookie Praliné Noisette", description: "Cœur coulant praliné noisette maison.", prix: 27, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 3 },
+    { id: "p12", categorie_id: 3, nom: "Cookie Kinder", description: "Éclats de Kinder et cœur fondant.", prix: 27, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 4 },
+    { id: "p13", categorie_id: 3, nom: "Cookie Praliné Pistache", description: "Cœur coulant praliné pistache.", prix: 29, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 5 },
+
+    { id: "p14", categorie_id: 4, nom: "Tiramisu Nutella", description: "Mascarpone, biscuits imbibés et Nutella.", prix: 20, ancien_prix: null, promo_label: "", stock: 3, suivre_stock: true, image_url: "", actif: true, ordre: 1 },
+    { id: "p15", categorie_id: 4, nom: "Tiramisu Café", description: "Le classique : mascarpone, café et cacao.", prix: 20, ancien_prix: null, promo_label: "", stock: 2, suivre_stock: true, image_url: "", actif: true, ordre: 2 },
+    { id: "p16", categorie_id: 4, nom: "Tiramisu Mangue / Citron", description: "Version fruitée et acidulée.", prix: 25, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 3 },
+    { id: "p17", categorie_id: 4, nom: "Tiramisu Pistache", description: "Mascarpone et crème de pistache.", prix: 29, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 4 },
+    { id: "p18", categorie_id: 4, nom: "Mousse au chocolat", description: "Chocolat noir intense, texture aérienne.", prix: 25, ancien_prix: null, promo_label: "", stock: 5, suivre_stock: true, image_url: "", actif: true, ordre: 5 },
+
+    { id: "p19", categorie_id: 5, nom: "Cheesecake Lotus", description: "Base spéculoos et nappage Lotus.", prix: 20, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 1 },
+    { id: "p20", categorie_id: 5, nom: "Cheesecake Nutella", description: "Crème onctueuse et nappage Nutella.", prix: 20, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 2 },
+    { id: "p21", categorie_id: 5, nom: "Cheesecake Oreo", description: "Base et éclats d'Oreo.", prix: 20, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 3 },
+    { id: "p22", categorie_id: 5, nom: "Cheesecake Bueno", description: "Crème noisette et éclats de Bueno.", prix: 20, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 4 },
+
+    { id: "p23", categorie_id: 6, nom: "Glace Vanille Bourbon — Petit", description: "Glace artisanale à la vanille Bourbon, petit format.", prix: 12, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 1 },
+    { id: "p24", categorie_id: 6, nom: "Glace Vanille Bourbon — Grand", description: "Glace artisanale à la vanille Bourbon, grand format.", prix: 20, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 2 },
+    { id: "p25", categorie_id: 6, nom: "Supplément caramel beurre salé — Petit", description: "Nappage caramel beurre salé maison pour votre glace.", prix: 2, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 3 },
+    { id: "p26", categorie_id: 6, nom: "Supplément caramel beurre salé — Grand", description: "Nappage caramel beurre salé maison, grand format.", prix: 4, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 4 },
+    { id: "p27", categorie_id: 6, nom: "Cookie glacé vanille caramel — Petit", description: "Cookie maison garni de glace vanille et caramel.", prix: 15, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 5 },
+    { id: "p28", categorie_id: 6, nom: "Cookie glacé vanille caramel — Grand", description: "Grand cookie garni de glace vanille et caramel.", prix: 28, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 6 },
+  ],
+  bannieres: [
+    { id: "b1", titre: "Offre du week-end", texte: "3 cookies achetés = le 4ᵉ offert, à préciser en remarque de commande.", style: "or", actif: true, ordre: 1 },
+  ],
+  commandes: [],
+};

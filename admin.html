@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Espace pâtissier — Bianchi Dessert</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#14110e">
+  <link rel="icon" href="assets/logo.png" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- Connexion -->
+  <div class="login" id="login">
+    <div class="login-card">
+      <img class="logo" src="assets/logo.png" alt="Bianchi Dessert">
+      <h1>Espace pâtissier</h1>
+      <p>Stocks, prix, promotions et commandes.</p>
+      <form id="loginForm">
+        <div class="field" id="emailField"><label for="email">Email</label><input id="email" type="email" autocomplete="username" placeholder="vous@exemple.com"></div>
+        <div class="field"><label for="pass" id="passLabel">Mot de passe</label><input id="pass" type="password" autocomplete="current-password" required></div>
+        <div class="login-err" id="loginErr"></div>
+        <button class="btn btn-ink btn-block" type="submit">Se connecter</button>
+      </form>
+      <div class="demo-hint" id="demoHint" hidden>Mode démo : entrez le code <b>1234</b>. Les modifications restent dans ce navigateur.</div>
+      <a href="index.html" style="font-size:13px;color:var(--muted)">← Retour au site</a>
+    </div>
+  </div>
+
+  <!-- Coque admin -->
+  <div id="app" hidden>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <img src="assets/logo.png" alt="">
+        <div class="title">BIAN<span>CHI</span> · Admin</div>
+        <div class="spacer"></div>
+        <a href="index.html" target="_blank" rel="noopener">Voir le site ↗</a>
+        <button class="linkish" id="logout">Déconnexion</button>
+      </div>
+    </div>
+    <div class="tabs"><div class="tabs-inner" id="tabs">
+      <button class="tab active" data-tab="stock">📦 Stock du jour</button>
+      <button class="tab" data-tab="commandes">🧾 Commandes <span class="badge" id="badgeCmd" hidden>0</span></button>
+      <button class="tab" data-tab="produits">🍰 Produits</button>
+      <button class="tab" data-tab="promos">✨ Promotions</button>
+      <button class="tab" data-tab="parametres">⚙️ Paramètres</button>
+    </div></div>
+    <div class="page" id="page"></div>
+  </div>
+
+  <div class="amodal" id="amodal"><div class="amodal-card" id="amodalCard"></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/catalogue-traductions.js"></script>
+  <script src="js/demo-data.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

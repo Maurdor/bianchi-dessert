@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Bianchi Dessert">
+  <defs>
+    <path id="arcTop" d="M 70 200 A 130 130 0 0 1 330 200"/>
+    <path id="arcBottom" d="M 60 200 A 140 140 0 0 0 340 200"/>
+    <radialGradient id="ink" cx="50%" cy="38%" r="70%">
+      <stop offset="0" stop-color="#2a2420"/>
+      <stop offset="1" stop-color="#0d0b09"/>
+    </radialGradient>
+  </defs>
+  <circle cx="200" cy="200" r="198" fill="#ffffff"/>
+  <circle cx="200" cy="200" r="184" fill="url(#ink)"/>
+  <circle cx="200" cy="200" r="150" fill="none" stroke="#c8a464" stroke-width="1.5" opacity=".9"/>
+  <circle cx="200" cy="200" r="144" fill="none" stroke="#c8a464" stroke-width=".6" opacity=".6"/>
+  <!-- tricolore -->
+  <g transform="translate(200 40)">
+    <rect x="-42" y="-6" width="28" height="12" rx="2" fill="#009246"/>
+    <rect x="-14" y="-6" width="28" height="12" fill="#f4f4f4"/>
+    <rect x="14" y="-6" width="28" height="12" rx="2" fill="#ce2b37"/>
+  </g>
+  <!-- whisks -->
+  <g stroke="#e8dcc4" stroke-width="2" fill="none" stroke-linecap="round">
+    <path d="M186 132 l-22 -40 M186 132 l-28 -32 M186 132 l-12 -44 M186 132 l-2 -46"/>
+    <path d="M214 132 l22 -40 M214 132 l28 -32 M214 132 l12 -44 M214 132 l2 -46"/>
+    <path d="M186 132 l6 22 M214 132 l-6 22" stroke="#c8a464" stroke-width="4"/>
+  </g>
+  <text x="200" y="228" text-anchor="middle" font-family="'Cormorant Garamond','Cinzel','Georgia',serif" font-weight="700" font-size="68" fill="#f6f1e8" letter-spacing="2">BIANCHI</text>
+  <text x="200" y="262" text-anchor="middle" font-family="'Cormorant Garamond','Georgia',serif" font-size="22" fill="#c8a464" letter-spacing="9">DESSERT</text>
+  <path d="M120 280 H280" stroke="#c8a464" stroke-width=".8" opacity=".7"/>
+  <text x="200" y="330" text-anchor="middle" font-family="'Cormorant Garamond','Georgia',serif" font-style="italic" font-size="18" fill="#e8dcc4">Per l'amor del gusto</text>
+  <text font-family="'Manrope','Helvetica',sans-serif" font-size="12.5" font-weight="700" fill="#e8dcc4" letter-spacing="2.5">
+    <textPath href="#arcTop" startOffset="50%" text-anchor="middle">TIRAMISÙ · GLACES · PANNA COTTA · CHEESECAKE · MOUSSE</textPath>
+  </text>
+</svg>
