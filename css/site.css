@@ -432,3 +432,10 @@ html[dir="rtl"] .line-sub, html[dir="rtl"] .supp-add { padding-left: 0; padding-
 @media (max-width: 1023px) { .hero-annonce { padding: 0 0 10px; font-weight: 600; color: var(--muted); } }
 
 @media (max-width: 1023px) { .head-day .eyebrow { letter-spacing: .12em; font-size: 10.5px; } }
+@media (max-width: 1023px) {
+  .head-day.mob { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: 12px; row-gap: 4px; }
+  .head-day.mob > div:first-child { display: contents; }
+  .head-day.mob .eyebrow { grid-column: 1 / -1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .14em; font-size: 10.5px; }
+  .head-day.mob h1 { grid-column: 1; }
+  .head-day.mob .count { grid-column: 2; padding-bottom: 4px; }
+}

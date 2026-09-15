@@ -1,7 +1,7 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 6,
+  version: 7,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
@@ -26,6 +26,7 @@ window.BIANCHI_DEMO = {
     { id: 4, nom: "Tiramisù & Mousses", emoji: "🍰", sous_titre: "En verrine individuelle", ordre: 2, actif: true },
     { id: 5, nom: "Cheesecakes", emoji: "🧁", sous_titre: "Base biscuitée, crème onctueuse", ordre: 5, actif: true },
     { id: 6, nom: "Glaces & Cookies glacés", emoji: "🍨", sous_titre: "Préparés à la commande, toujours disponibles", ordre: 6, actif: true },
+    { id: 7, nom: "Boissons maison", emoji: "🥤", sous_titre: "Pressées et préparées à la commande", ordre: 7, actif: true },
   ],
   produits: [
     { id: "p01", categorie_id: 1, nom: "Charlotte aux pommes cannelle", description: "Biscuits cuillère, compotée de pommes à la cannelle et crème légère.", prix: 30, ancien_prix: null, promo_label: "Best-seller", stock: 4, suivre_stock: true, image_url: "assets/produits/charlotte-pommes.jpg", actif: true, ordre: 1 },
@@ -61,6 +62,8 @@ window.BIANCHI_DEMO = {
     { id: "p26", categorie_id: 6, nom: "Caramel beurre salé maison — Grand", description: "Caramel au beurre salé fait maison, nappé généreusement sur le grand format.", prix: 4, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/supplement-caramel.jpg", actif: true, ordre: 4, supplement: true },
     { id: "p27", categorie_id: 6, nom: "Cookie glacé vanille caramel — Petit", description: "Cookie maison garni de glace vanille et caramel.", prix: 15, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/cookie-glace-petit.jpg", actif: true, ordre: 5 },
     { id: "p28", categorie_id: 6, nom: "Cookie glacé vanille caramel — Grand", description: "Grand cookie garni de glace vanille et caramel.", prix: 28, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/cookie-glace-grand.jpg", actif: true, ordre: 6 },
+    { id: "p29", categorie_id: 7, nom: "Jus d'orange pressé maison", description: "Oranges pressées à la demande, sans sucre ajouté.", prix: 15, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/jus-orange.jpg", actif: true, ordre: 1 },
+    { id: "p30", categorie_id: 7, nom: "Mojito menthe glacé", description: "Menthe fraîche, citron pressé, glace pilée. Sans alcool.", prix: 20, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/mojito-menthe.jpg", actif: true, ordre: 2 },
   ],
   bannieres: [
     { id: "b1", titre: "Offre cookies : 3 achetés, le 4ᵉ offert", texte: "Ajoutée automatiquement à votre commande dès 3 cookies.", icone: "4ᵉ", style: "or", actif: true, ordre: 1 },
