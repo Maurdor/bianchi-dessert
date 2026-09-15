@@ -111,7 +111,7 @@ Tout le texte visible par les clients existe en **français, arabe, anglais, all
 
 ## Logo et photos
 
-Le logo officiel est dans `assets/logo.png`. Les photos des produits s'ajoutent depuis l'admin (onglet Produits → Modifier → Photo) : elles sont réduites automatiquement et stockées gratuitement dans Supabase.
+Le logo officiel est dans `assets/logo.png`. Les 15 photos de `assets/produits/` ont été extraites des reels Instagram de @bianchi_desserts pour la présentation (cookies, tiramisù, beignets, glaces) ; le pâtissier pourra les remplacer par ses propres photos depuis l'admin (onglet Produits → Modifier → Photo) : elles sont réduites automatiquement et stockées gratuitement dans Supabase. Le script SQL référence ces photos par leur adresse GitHub Pages. L'image de partage `assets/og.jpg` utilise le cookie praliné pistache.
 
 ## Limites du plan gratuit (largement suffisant)
 
