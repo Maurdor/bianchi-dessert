@@ -44,7 +44,7 @@ window.BIANCHI_TRADUCTIONS = {
     "Cookie glacé vanille caramel — Grand": { ar: { nom: "كوكي مثلج فانيليا كراميل — كبير", description: "كوكي كبير محشو بمثلجات الفانيليا والكراميل." }, en: { nom: "Vanilla caramel ice cream cookie — Large", description: "Large cookie filled with vanilla ice cream and caramel." }, de: { nom: "Eis-Cookie Vanille-Karamell — Groß", description: "Großer Cookie mit Vanilleeis und Karamell." }, nl: { nom: "IJskoekje vanille-karamel — Groot", description: "Groot koekje gevuld met vanille-ijs en karamel." } },
   },
   bannieres: {
-    "Offre du week-end": { ar: { titre: "عرض نهاية الأسبوع", texte: "اشترِ 3 كوكيز واحصل على الرابع مجاناً، يُذكر في ملاحظة الطلب." }, en: { titre: "Weekend offer", texte: "Buy 3 cookies, get the 4th free. Mention it in your order note." }, de: { titre: "Wochenend-Angebot", texte: "3 Cookies kaufen, den 4. gratis. Bitte in der Bestellanmerkung angeben." }, nl: { titre: "Weekendaanbieding", texte: "Koop 3 koekjes, de 4e gratis. Vermeld het in de opmerking bij uw bestelling." } },
+    "Offre cookies : 3 achetés, le 4ᵉ offert": { ar: { titre: "عرض الكوكيز: اشترِ 3 والرابع مجاناً", texte: "تُضاف تلقائياً إلى طلبك بدءاً من 3 كوكيز." }, en: { titre: "Cookie offer: buy 3, get the 4th free", texte: "Added automatically to your order from 3 cookies." }, de: { titre: "Cookie-Angebot: 3 kaufen, das 4. gratis", texte: "Ab 3 Cookies automatisch zu Ihrer Bestellung hinzugefügt." }, nl: { titre: "Koekjesactie: koop 3, de 4e gratis", texte: "Automatisch toegevoegd aan uw bestelling vanaf 3 koekjes." } },
   },
   promo_labels: {
     "Best-seller": { ar: "الأكثر مبيعاً", en: "Best-seller", de: "Bestseller", nl: "Bestseller" },
@@ -53,9 +53,9 @@ window.BIANCHI_TRADUCTIONS = {
     "Édition limitée": { ar: "إصدار محدود", en: "Limited edition", de: "Limitierte Auflage", nl: "Beperkte oplage" },
   },
   parametres: {
-    ar: { horaires: "الطلبات كل يوم · 10:00 – 22:00", delai_texte: "استلام أو توصيل في نفس اليوم حسب المخزون", annonce: "جديد: اطلب عبر الإنترنت، المخزون المعروض هو مخزون اليوم · توصيل في تطوان · الدفع عند الاستلام", message_ferme: "تستأنف الطلبات صباح الغد. إلى اللقاء قريباً!" },
-    en: { horaires: "Orders every day · 10:00 – 22:00", delai_texte: "Same-day pick-up or delivery, depending on stock", annonce: "New: order online, the stock shown is today's · Delivery in Tétouan · Pay on delivery", message_ferme: "Orders resume tomorrow morning. See you soon!" },
-    de: { horaires: "Bestellungen täglich · 10:00 – 22:00", delai_texte: "Abholung oder Lieferung am selben Tag, je nach Bestand", annonce: "Neu: online bestellen, der angezeigte Bestand ist der von heute · Lieferung in Tétouan · Zahlung bei Übergabe", message_ferme: "Bestellungen sind ab morgen früh wieder möglich. Bis bald!" },
-    nl: { horaires: "Bestellingen elke dag · 10:00 – 22:00", delai_texte: "Afhalen of bezorging op dezelfde dag, afhankelijk van de voorraad", annonce: "Nieuw: bestel online, de getoonde voorraad is die van vandaag · Bezorging in Tétouan · Betaling bij ontvangst", message_ferme: "Bestellen kan morgenochtend weer. Tot snel!" },
+    ar: { horaires: "الطلبات كل يوم · 10:00 – 22:00", delai_texte: "استلام أو توصيل في نفس اليوم حسب المخزون", annonce: "توصيل 10 د.م. في تطوان، مجاني من 60 د.م. · الدفع عند الاستلام · مخزون اليوم مباشر", message_ferme: "تستأنف الطلبات صباح الغد. إلى اللقاء قريباً!" },
+    en: { horaires: "Orders every day · 10:00 – 22:00", delai_texte: "Same-day pick-up or delivery, depending on stock", annonce: "Delivery 10 DH in Tétouan, free from 60 DH · Pay on delivery · Today's stock, live", message_ferme: "Orders resume tomorrow morning. See you soon!" },
+    de: { horaires: "Bestellungen täglich · 10:00 – 22:00", delai_texte: "Abholung oder Lieferung am selben Tag, je nach Bestand", annonce: "Lieferung 10 DH in Tétouan, kostenlos ab 60 DH · Zahlung bei Übergabe · Tagesbestand live", message_ferme: "Bestellungen sind ab morgen früh wieder möglich. Bis bald!" },
+    nl: { horaires: "Bestellingen elke dag · 10:00 – 22:00", delai_texte: "Afhalen of bezorging op dezelfde dag, afhankelijk van de voorraad", annonce: "Bezorging 10 DH in Tétouan, gratis vanaf 60 DH · Betaling bij ontvangst · Voorraad van vandaag, live", message_ferme: "Bestellen kan morgenochtend weer. Tot snel!" },
   },
 };

@@ -62,7 +62,7 @@
     clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 2600);
   }
 
-  const photoHtml = (p, extra = "") => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>${p.vedette ? `<span class="promo">★ ${esc(t("featured"))}</span>` : ""}${p.promo_label ? `<span class="promo">${esc(promoTxt(p))}</span>` : ""}${extra}</div>`;
+  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}${sansTag ? "" : `<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>`}${p.vedette || p.promo_label ? `<div class="badges">${p.vedette ? `<span class="promo">★ ${esc(t("featured"))}</span>` : ""}${p.promo_label ? `<span class="promo">${esc(promoTxt(p))}</span>` : ""}</div>` : ""}${extra}</div>`;
 
   // ---------- Textes statiques ----------
   function applyStatic() {
@@ -87,10 +87,10 @@
     document.title = shopName();
     $("#slogan").textContent = p.slogan || "";
     $("#shopName").textContent = shopName();
-    const statusTxt = ouvert() ? `${t("orders_open")}${c(p, "horaires") ? " · " + c(p, "horaires") : ""}` : t("orders_closed");
-    $("#statusDesk").textContent = ouvert() ? t("orders_open") : t("orders_closed"); $("#statusMob").textContent = statusTxt;
+    $("#statusDesk").textContent = ouvert() ? t("orders_open") : t("orders_closed"); $("#statusMob").textContent = ouvert() ? t("orders_open") : t("orders_closed");
     $("#dotDesk").classList.toggle("ferme", !ouvert()); $("#dotMob").classList.toggle("ferme", !ouvert());
-    $("#delaiMob").textContent = c(p, "delai_texte") || "";
+    $("#delaiMob").textContent = [c(p, "horaires"), ...String(c(p, "annonce") || "").split(/\s*·\s*/).filter(Boolean)].filter(Boolean).join(" · ");
+    $("#btnWaMob").hidden = !p.whatsapp;
     const wa = "https://wa.me/" + String(p.whatsapp || "").replace(/\D/g, "");
     $("#btnWaMob").href = wa; $("#btnWaDesk").href = wa; $("#btnWaDesk").hidden = !p.whatsapp;
     const closed = $("#closedBanner"); closed.hidden = ouvert(); $("#closedMsg").textContent = c(p, "message_ferme") || "";
@@ -139,17 +139,20 @@
     const orphelins = visibles.filter((p) => !cats.some((x) => x.id === p.categorie_id));
     if (orphelins.length) sections.push({ id: "autres", nom: t("others"), produits: orphelins });
 
-    const navHtml = sections.map((s, i) => `<a href="#${s.id}" data-target="${s.id}"${i === 0 ? ' class="active"' : ""}>${esc(s.nom)}</a>`).join("");
+    sections.forEach((s) => { s.avail = s.produits.filter(dispo); s.sold = s.produits.filter((p) => !dispo(p)); });
+    sections.sort((a, b) => (b.avail.length ? 1 : 0) - (a.avail.length ? 1 : 0));
+    const navHtml = sections.filter((s) => s.avail.length && !(s.avail.length === 1 && s.avail[0] === vedette && !s.sold.length)).map((s, i) => `<a href="#${s.id}" data-target="${s.id}"${i === 0 ? ' class="active"' : ""}>${esc(s.nom)}</a>`).join("");
     $("#catnav").innerHTML = navHtml;
 
     const main = $("#catalogue");
     if (!sections.length) { main.innerHTML = `<p class="empty">${q ? esc(t("no_match", { q: recherche })) : esc(t("catalogue_soon"))}</p>`; return; }
     main.innerHTML = `<div class="head-count"><h2>${esc(t("n_available", { n: nbDispo }))}</h2></div>${vedette ? featuredCard(vedette) : ""}` + sections.map((s, i) => {
-      const avail = s.produits.filter(dispo), sold = s.produits.filter((p) => !dispo(p));
-      return `<section class="section${i === 0 ? " first" : ""}" id="${s.id}">
+      const avail = s.avail, sold = s.sold;
+      const seuleVedette = avail.length === 1 && avail[0] === vedette && !sold.length;
+      return `<section class="section${i === 0 ? " first" : ""}${seuleVedette ? " only-featured" : ""}${avail.length ? "" : " no-stock"}" id="${s.id}">
         <div class="section-head"><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div>
         ${s.rows ? `<div class="rows">${avail.map(rowItem).join("")}</div>` : avail.length ? `<div class="grid">${avail.map((p) => carte(p, p === vedette)).join("")}</div>` : ""}
-        ${sold.length ? `<details class="soldout"><summary>${esc(t("soldout_n", { n: sold.length }))}</summary><div class="grid">${sold.map((p) => carte(p)).join("")}</div></details>` : ""}
+        ${sold.length ? `<details class="soldout"${avail.length ? "" : " open"}><summary>${esc(t("soldout_n", { n: sold.length }))}</summary><div class="grid">${sold.map((p) => carte(p)).join("")}</div></details>` : ""}
       </section>`;
     }).join("");
   }
@@ -174,12 +177,13 @@
   function featuredCard(p) {
     const q = cart[p.id] || 0;
     const action = q > 0 ? actionHtml(p) : `<button class="btn btn-ink btn-sm" data-plus="${p.id}">${esc(t("add"))}</button>`;
+    const st = p.suivre_stock && (p.stock || 0) > 3 ? t("pieces_today", { n: p.stock }) : stockTxt(p);
     return `<article class="featured" data-id="${p.id}">
-      ${photoHtml(p)}
+      ${photoHtml(p, "", true)}
       <div class="featured-body">
         <div class="row"><h3 data-open="${p.id}">${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
-        <div class="foot"><span class="stock-inline ${stockKind(p)}">${esc(stockTxt(p))}</span>${action}</div>
+        <div class="foot"><span class="stock-inline ${stockKind(p)}">${esc(st)}</span>${action}</div>
       </div>
     </article>`;
   }
@@ -213,25 +217,35 @@
     return Number(data.parametres.frais_livraison || 0);
   };
   // Suggestions « Complétez votre commande » : complément de format, pièce du jour, autres catégories à petit prix, rareté
-  function suggestionsHtml(lines) {
+  function suggestionsHtml(lines, mode) {
     if (!lines.length || lines.length >= 4) return "";
     const inCart = new Set(lines.map((l) => l.p.id)), catsIn = new Set(lines.map((l) => l.p.categorie_id));
     const pool = data.produits.filter((p) => p.actif !== false && dispo(p) && !inCart.has(p.id));
     const picks = [];
-    const push = (p) => { if (p && !picks.includes(p) && picks.length < 3) picks.push(p); };
-    lines.forEach((l) => { const suf = (String(l.p.nom).split(" — ")[1] || "").trim(); if (suf) pool.filter((p) => p.categorie_id === l.p.categorie_id && p.prix <= 5 && String(p.nom).endsWith("— " + suf)).forEach(push); });
-    pool.filter((p) => p.vedette).forEach(push);
-    // Autres catégories à petit prix (les suppléments à moins de 5 DH ne s'affichent qu'avec leur glace, règle 1)
-    pool.filter((p) => !catsIn.has(p.categorie_id) && p.prix <= 15 && p.prix > 5).sort((a, b) => a.prix - b.prix).forEach(push);
-    pool.filter((p) => stockKind(p) === "warn" && p.prix > 5).forEach(push);
+    const push = (p, why) => { if (p && !picks.some((x) => x.p === p) && picks.length < 3) picks.push({ p, why }); };
+    // 1. Complément de format (supplément caramel assorti à une glace)
+    lines.forEach((l) => { const suf = (String(l.p.nom).split(" — ")[1] || "").trim(); if (suf) pool.filter((p) => p.categorie_id === l.p.categorie_id && p.prix <= 5 && String(p.nom).endsWith("— " + suf)).forEach((p) => push(p, t("why_complement"))); });
+    // 2. Combler la livraison offerte : le produit le moins cher qui atteint le seuil
+    const seuil = seuilOffert(), reste = seuil - sousTotal();
+    if (mode === "livraison" && seuil > 0 && reste > 0 && reste <= 30) {
+      const cand = pool.filter((p) => p.prix >= reste && p.prix > 5).sort((a, b) => a.prix - b.prix)[0];
+      if (cand) push(cand, t("why_free_delivery"));
+    }
+    // 3. Deuxième parfum dans la même catégorie (verrines, beignets, cookies)
+    lines.filter((l) => l.p.suivre_stock).forEach((l) => { const autre = pool.filter((p) => p.categorie_id === l.p.categorie_id && p.prix > 5).sort((a, b) => b.prix - a.prix)[0]; if (autre) push(autre, t("why_second")); });
+    // 4. Pièce du jour
+    pool.filter((p) => p.vedette).forEach((p) => push(p, t("why_featured")));
+    // 5. Dernières pièces
+    pool.filter((p) => stockKind(p) === "warn" && p.prix >= 15).forEach((p) => push(p, t("why_last")));
     if (!picks.length) return "";
-    return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map((p) => `<div class="suggest-item"><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${stockKind(p)}">${esc(stockTxt(p))}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
+    return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map(({ p, why }) => `<div class="suggest-item"><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${why === t("why_last") ? "warn" : ""}">${esc(why)}${p.suivre_stock && (p.stock || 0) <= 3 ? " · " + esc(stockTxt(p)) : ""}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
   }
 
   function refreshCartUI() {
-    const n = cartLines().reduce((s, l) => s + l.qte, 0);
+    const n = cartLines().reduce((s0, l) => s0 + l.qte, 0);
     $("#cartCount").textContent = n;
     $("#cartFabTotal").textContent = n ? money(sousTotal()) : "";
+    const lbl = $("#cartFab [data-i18n]"); if (lbl) lbl.textContent = t("order_cta");
     $("#cartN").textContent = n ? t("items_count", { n }) : "";
     $("#cartFab").classList.toggle("hidden", n === 0);
     if ($("#drawer").classList.contains("open")) renderDrawer();
@@ -287,6 +301,8 @@
   function renderDrawer() {
     const body = $("#drawerBody"), foot = $("#drawerFoot");
     if (confirmation) { renderConfirmation(); return; }
+    const f0 = $("#formCommande"), scrollY = body.scrollTop;
+    if (f0) clientInfo = { ...clientInfo, nom: f0.nom.value, tel: f0.tel.value, indicatif: f0.indicatif.value, adresse: f0.adresse?.value ?? clientInfo.adresse, complement: f0.complement?.value ?? clientInfo.complement, remarque: f0.remarque.value, date: f0.date.value, creneau: f0.creneau?.value };
     const lines = cartLines();
     if (!lines.length) {
       body.innerHTML = `<div class="cart-empty"><div class="big">🍰</div><p>${esc(t("cart_empty"))}<br>${esc(t("cart_empty_sub"))}</p></div>`;
@@ -295,17 +311,17 @@
       return;
     }
     const p = data.parametres;
-    const mode = clientInfo.mode || (p.livraison_active ? "" : "retrait");
+    const mode = clientInfo.mode || (p.livraison_active ? "livraison" : "retrait");
     const minDate = new Date().toISOString().slice(0, 10);
     const maxDate = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
     body.innerHTML = `
       <div>${lines.map((l) => `
         <div class="line">
           <div class="line-name"><b>${esc(nomP(l.p))}</b><small class="num">${esc(t("unit_price", { price: money(l.p.prix) }))}${l.p.suivre_stock ? ` · ${esc(l.p.stock - l.qte <= 1 ? t("suggest_last") : t("in_stock", { n: l.p.stock }))}` : ""}</small><button class="remove" data-remove="${l.p.id}">${esc(t("remove"))}</button></div>
-          <span class="stepper"><button data-moins="${l.p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${l.qte}</span><button data-plus="${l.p.id}" aria-label="${esc(t("more"))}">+</button></span>
+          <span class="stepper"><button data-moins="${l.p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${l.qte}</span><button data-plus="${l.p.id}" aria-label="${esc(t("more"))}">+</button>${l.p.prix <= 10 && l.qte < 4 && stockMax(l.p) >= 4 ? `<button class="x4" data-qty4="${l.p.id}">${esc(t("qty4"))}</button>` : ""}</span>
           <span class="line-price num">${esc(money(l.p.prix * l.qte))}</span>
         </div>`).join("")}</div>
-      ${suggestionsHtml(lines)}
+      ${suggestionsHtml(lines, mode)}
 
       <form class="form" id="formCommande" novalidate>
         <div class="eyebrow">${esc(t("your_details"))}</div>
@@ -322,14 +338,14 @@
         </div>
         <div id="livraisonBloc"${mode === "livraison" ? "" : " hidden"}>
           <div class="gps" id="gpsBloc">${gpsHtml()}</div>
+          <div class="field" id="adresseField" style="margin-top:10px"${gps ? " hidden" : ""}><label for="cAdr">${esc(t("delivery_address"))} <small>${esc(t("or_address"))}</small></label><input id="cAdr" name="adresse" placeholder="${esc(t("address_ph"))}" value="${esc(clientInfo.adresse || "")}"></div>
           <div class="field" style="margin-top:10px"><label for="cCompl">${esc(t("address_extra"))} <small>${esc(t("optional"))}</small></label><input id="cCompl" name="complement" value="${esc(clientInfo.complement || "")}" placeholder="${esc(t("address_ph"))}"></div>
-          <div class="field" id="adresseField" style="margin-top:10px"${gps ? " hidden" : ""}><label for="cAdr">${esc(t("delivery_address"))} <span class="req">*</span></label><textarea id="cAdr" name="adresse" placeholder="${esc(t("address_ph"))}">${esc(clientInfo.adresse || "")}</textarea></div>
         </div>
         <div class="row2">
-          <div class="field"><label for="cDate">${esc(t("when"))} <small>${esc(t("optional"))}</small></label><input id="cDate" name="date" type="date" min="${minDate}" max="${maxDate}"></div>
-          <div class="field"><label for="cCren">${esc(t("slot"))}</label><select id="cCren" name="creneau">${CRENEAUX.map((k) => `<option value="${k}">${esc(t("slot_" + k))}</option>`).join("")}</select></div>
+          <div class="field"><label for="cDate">${esc(t("when"))} <small>${esc(t("optional"))}</small></label><input id="cDate" name="date" type="date" min="${minDate}" max="${maxDate}" value="${esc(clientInfo.date || "")}"></div>
+          <div class="field"><label for="cCren">${esc(t("slot"))}</label><select id="cCren" name="creneau">${CRENEAUX.map((k) => `<option value="${k}"${clientInfo.creneau === k ? " selected" : ""}>${esc(t("slot_" + k))}</option>`).join("")}</select></div>
         </div>
-        <div class="field"><label for="cRem">${esc(t("remark"))} <small>${esc(t("optional"))}</small></label><input id="cRem" name="remarque" placeholder="${esc(t("remark_ph"))}"></div>
+        <div class="field"><label for="cRem">${esc(t("remark"))} <small>${esc(t("optional"))}</small></label><input id="cRem" name="remarque" placeholder="${esc(t("remark_ph"))}" value="${esc(clientInfo.remarque || "")}"></div>
         ${c(p, "delai_texte") ? `<div class="note">${ICON.clock}<span>${esc(c(p, "delai_texte"))}</span></div>` : ""}
       </form>`;
 
@@ -358,8 +374,8 @@
     });
     $("#envoyer").onclick = envoyerCommande;
     wireGps();
-    // Client déjà connu qui avait accepté la localisation : on la redemande sans clic
-    if (mode === "livraison" && !gps && !gpsRefuse && clientInfo.gpsOk && ouvert()) demanderGps(true);
+    body.scrollTop = scrollY;
+
   }
 
   async function envoyerCommande() {
@@ -372,11 +388,28 @@
     const complement = (f.complement?.value || "").trim();
     const date = f.date.value;
     const creneau = f.creneau ? f.creneau.value : "asap";
-    const remarque = f.remarque.value.trim();
-    if (!nom) return toast(t("err_name"), true), f.nom.focus();
+    let remarque = f.remarque.value.trim();
+    $$(".field.err", f).forEach((el) => el.classList.remove("err"));
+    const bad = (el) => { el.closest(".field")?.classList.add("err"); el.setAttribute("aria-invalid", "true"); el.focus(); };
+    if (!nom) return toast(t("err_name"), true), bad(f.nom);
     if (!mode) return toast(t("choose_mode"), true);
-    if (tel.length < 8) return toast(t("err_phone"), true), f.tel.focus();
-    if (mode === "livraison" && !gps && !adresse) { $("#adresseField").hidden = false; return toast(t("err_location"), true), f.adresse.focus(); }
+    // Offre cookies 3+1 appliquée automatiquement (le pâtissier ajoute la 4e pièce, non facturée)
+    const catCookies = data.categories.find((x) => /cookie/i.test(x.nom));
+    if (catCookies && cartLines().filter((l) => l.p.categorie_id === catCookies.id).reduce((s0, l) => s0 + l.qte, 0) >= 3 && (data.bannieres || []).some((b) => b.actif && /cookie/i.test(b.titre + b.texte))) remarque = [t("offer_cookies"), remarque].filter(Boolean).join(" · ");
+    if (tel.length < 8) return toast(t("err_phone"), true), bad(f.tel);
+    if (mode === "livraison" && !gps && !adresse) {
+      // Ni position ni adresse : on demande la position maintenant et on enchaîne tout seul
+      if (navigator.geolocation && !gpsRefuse) {
+        const btn0 = $("#envoyer"); btn0.disabled = true; btn0.textContent = t("gps_locating");
+        navigator.geolocation.getCurrentPosition(
+          (pos) => { gps = { lat: pos.coords.latitude, lng: pos.coords.longitude, precision: pos.coords.accuracy }; saveClient({ ...clientInfo, gpsOk: true }); envoyerCommande(); },
+          () => { gpsRefuse = true; renderDrawer(); toast(t("err_location"), true); $("#cAdr")?.focus(); },
+          { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+        );
+        return;
+      }
+      $("#adresseField").hidden = false; return toast(t("err_location"), true), f.adresse.focus();
+    }
 
     saveClient({ nom, tel: f.tel.value.trim(), indicatif, mode, adresse, complement });
     const btn = $("#envoyer"); btn.disabled = true; btn.textContent = t("saving");
@@ -423,28 +456,23 @@
   function messageWhatsApp(cf) {
     const fmt = (n) => `${Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} DH`;
     const ref = cf.code || cf.numero;
-    const lignes = cf.articles.map((l) => `- ${l.qte} x ${l.nom} : ${fmt(l.prix * l.qte)}`).join("\n");
     const fl = fraisLivraison(cf.mode);
     const dateFr = cf.date ? new Date(cf.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "aujourd'hui";
-    const quand = new Date(cf.heure || Date.now()).toLocaleString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
     const langue = L.LANGS[L.lang] ? L.LANGS[L.lang].nom : L.lang;
+    const ligneMode = cf.mode !== "livraison" ? `À emporter - retrait en boutique` : cf.client.gps_lat ? `Livraison - position GPS : ${mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng })}` : `Livraison`;
     return [
-      `*COMMANDE ${shopName().toUpperCase()} n° ${ref}*`,
-      `Passee sur le site le ${quand}`,
+      `*Commande n° ${ref} - ${shopName()}*`,
+      `Pour : ${dateFr}, ${(CRENEAU_FR[cf.creneau] || CRENEAU_FR.asap).toLowerCase()}`,
+      ligneMode,
+      cf.mode === "livraison" && cf.client.adresse ? `Adresse / complément : ${cf.client.adresse}` : null,
+      `Client : ${cf.client.client_nom} - ${cf.client.client_tel}${L.lang !== "fr" ? ` (langue : ${langue})` : ""}`,
       ``,
-      `Client : ${cf.client.client_nom} - ${cf.client.client_tel}`,
-      cf.mode === "livraison" ? (cf.client.gps_lat ? `Livraison (position GPS) : ${mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng })}` : `Livraison`) : `A emporter`,
-      cf.mode === "livraison" && cf.client.adresse ? `Adresse / complement : ${cf.client.adresse}` : null,
-      `Pour : ${dateFr} - ${CRENEAU_FR[cf.creneau] || CRENEAU_FR.asap}`,
-      L.lang !== "fr" ? `Langue du client : ${langue}` : null,
+      cf.articles.map((l) => `${l.qte} x ${l.nom} - ${fmt(l.prix * l.qte)}`).join("\n"),
+      cf.mode === "livraison" ? (fl ? `Livraison - ${fmt(fl)}` : `Livraison offerte`) : null,
+      `*Total : ${fmt(cf.total)}, à régler à la réception*`,
+      cf.remarque ? `\nRemarque : ${cf.remarque}` : null,
       ``,
-      lignes,
-      fl ? `- Livraison : ${fmt(fl)}` : (cf.mode === "livraison" ? `- Livraison offerte` : null),
-      ``,
-      `*TOTAL : ${fmt(cf.total)}* (a regler a la reception)`,
-      cf.remarque ? `Remarque : ${cf.remarque}` : null,
-      ``,
-      `Stock reserve. Ouvrir la commande : ${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${ref}`,
+      `Stock réservé. Fiche : ${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${ref}`,
     ].filter((x) => x !== null).join("\n");
   }
 
@@ -459,7 +487,7 @@
         <h3>${esc(t("stock_reserved_a"))} <em>${esc(t("stock_reserved_b"))}</em></h3>
         <p>${esc(t("confirm_text", { shop: shopName() }))}</p>
         ${L.lang !== "fr" ? `<p><small>${esc(t("confirm_lang_note"))}</small></p>` : ""}
-        <div class="recap" dir="ltr">${esc(msg).replace(/\*/g, "")}</div>
+        <div class="recap" dir="ltr">${esc(msg.split("\n").filter((l) => !l.startsWith("Stock réservé")).join("\n")).replace(/\*/g, "")}</div>
         <div class="grazie">${esc(t("grazie"))}</div>
       </div>`;
     $("#drawerFoot").innerHTML = `
@@ -499,7 +527,7 @@
     const ok = dispo(p);
     $("#modalCard").innerHTML = `
       <button class="modal-close" id="modalClose" aria-label="${esc(t("close"))}">×</button>
-      ${photoHtml(p).replace('data-open="' + p.id + '"', "")}
+      ${photoHtml(p, "", true).replace('data-open="' + p.id + '"', "")}
       <div class="modal-body">
         <span class="stock-inline ${stockKind(p)}">${esc(stockTxt(p))}</span>
         <div class="row"><h3>${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
@@ -507,25 +535,29 @@
         ${c(p, "allergenes") ? `<div class="allergenes"><b>${esc(t("allergens"))}</b> ${esc(c(p, "allergenes"))}</div>` : ""}
         <div class="modal-foot">
           <span class="stepper lg"><button id="mMoins" aria-label="${esc(t("less"))}">−</button><span id="mQty" class="num">1</span><button id="mPlus" aria-label="${esc(t("more"))}">+</button></span>
-          <button class="btn btn-ink" id="mAdd"${ok ? "" : " disabled"}>${ok ? `${esc(t("add"))} · <span class="num" id="mTotal">${esc(money(p.prix))}</span>` : esc(t("out_today"))}</button>
+          ${ok ? `<button class="btn btn-ink" id="mAdd">${esc(t("add"))} · <span class="num" id="mTotal">${esc(money(p.prix))}</span></button>` : `<a class="btn btn-outline-gold" target="_blank" rel="noopener" href="https://wa.me/${waNum()}?text=${encodeURIComponent(t("notify_msg", { name: nomP(p) }))}">${esc(t("notify_me"))}</a>`}
         </div>
+        ${cart[p.id] ? `<small style="color:var(--muted)">${esc(t("in_stock", { n: cart[p.id] }).replace(t("in_stock", { n: cart[p.id] }), cart[p.id] + " × " + t("cart_title").toLowerCase()))}</small>` : ""}
       </div>`;
     $("#modal").classList.add("open");
     const upd = () => { $("#mQty").textContent = modalQty; const el = $("#mTotal"); if (el) el.textContent = money(p.prix * modalQty); };
     $("#mMoins").onclick = () => { modalQty = Math.max(1, modalQty - 1); upd(); };
     $("#mPlus").onclick = () => { const max = Math.max(1, stockMax(p) - (cart[p.id] || 0)); if (modalQty >= max) { toast(t("max_stock", { n: stockMax(p) }), true); return; } modalQty++; upd(); };
-    $("#mAdd").onclick = () => { addToCart(p.id, modalQty); closeModal(); };
+    const add = $("#mAdd"); if (add) add.onclick = () => { addToCart(p.id, modalQty); closeModal(); };
     $("#modalClose").onclick = closeModal;
+    document.body.style.overflow = "hidden";
+    setTimeout(() => $("#modalClose")?.focus(), 200);
   }
-  function closeModal() { $("#modal").classList.remove("open"); }
+  function closeModal() { $("#modal").classList.remove("open"); if (!$("#drawer").classList.contains("open")) document.body.style.overflow = ""; }
 
   // ---------- Événements ----------
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-open],[data-target]");
+    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-open],[data-target]");
     if (!el) return;
     if (el.dataset.plus) { e.preventDefault(); addToCart(el.dataset.plus); }
     else if (el.dataset.moins) { e.preventDefault(); removeFromCart(el.dataset.moins); }
     else if (el.dataset.remove) removeFromCart(el.dataset.remove, 999);
+    else if (el.dataset.qty4) { const p = produit(el.dataset.qty4); if (p) { cart[p.id] = Math.min(4, stockMax(p)); saveCart(); refreshCartUI(); renderCatalogue(); } }
     else if (el.dataset.open) openModal(el.dataset.open);
     else if (el.dataset.target) {
       e.preventDefault();
@@ -541,7 +573,7 @@
   ["#recherche", "#rechercheMob"].forEach((sel) => { const el = $(sel); if (el) el.addEventListener("input", (e) => { recherche = e.target.value; $$("#recherche, #rechercheMob").forEach((o) => { if (o !== e.target) o.value = recherche; }); renderCatalogue(); }); });
 
   const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); });
+    entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"); if (a) $("#catnav").scrollTo({ left: a.offsetLeft - 20, behavior: "smooth" }); } });
   }, { rootMargin: "-90px 0px -70% 0px" });
   const observeSections = () => $$(".section").forEach((s) => io.observe(s));
 

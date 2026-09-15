@@ -94,6 +94,12 @@ Produits « sur commande » (glaces) : décochez *Suivre le stock* ; ils sont to
 - **Allergènes** : champ facultatif par produit (Produits → Modifier), traduisible ; affiché dans la fiche produit uniquement s'il est rempli.
 - Le mode de récupération n'est plus présélectionné : la position GPS est demandée au moment où le client choisit « Livraison ».
 
+## Audits UX/UI et vente (15/09/2026, seconde passe)
+
+Appliqués : mise en page bureau contenue à 1280 px, en-tête compact avec recherche, sections à carte unique en format paysage, épuisés dépliés quand rien n'est disponible, date affichée une seule fois, offre en tête de colonne, chiffres de prix lisibles, cibles tactiles de 42 à 44 px, zones de sécurité iPhone, contraste des étiquettes, champs du panier conservés lors d'un changement de quantité, mode Livraison présélectionné avec position GPS demandée au moment de réserver (et ajustable sur une carte OpenStreetMap), suggestions expliquées (complément, livraison offerte, deuxième parfum, pièce du jour, dernières pièces), raccourci ×4 sur les petits prix, offre cookies 3+1 ajoutée automatiquement à la remarque, message WhatsApp en texte simple avec accents, réponses admin avec montant, mode et créneau, bouton « Annuler et libérer le stock » après une heure sans envoi.
+
+Numéro de commande : année (2 chiffres) + mois + jour + rang du jour, ex. `269151` = 1re commande du 15/9/2026. Il figure dans la confirmation, le message WhatsApp, l'admin et le lien direct `admin.html#cmd=269151`.
+
 ## Cinq langues
 
 Tout le texte visible par les clients existe en **français, arabe, anglais, allemand et néerlandais** ; l'arabe s'affiche de droite à gauche. Le sélecteur de langue est en haut du site et la langue est mémorisée ; au premier passage, celle du navigateur est choisie.

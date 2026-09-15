@@ -14,15 +14,15 @@ window.BIANCHI_DEMO = {
     message_ferme: "Les commandes reprennent demain matin. À très vite !",
     livraison_active: true,
     frais_livraison: 10,
-    livraison_offerte_des: 80,
+    livraison_offerte_des: 60,
     commande_min: 0,
-    annonce: "Nouveau : commandez en ligne, le stock affiché est celui du jour · Livraison à Tétouan · Paiement à la réception",
+    annonce: "Livraison 10 DH à Tétouan, offerte dès 60 DH · Paiement à la réception · Stock du jour en direct",
   },
   categories: [
     { id: 1, nom: "Charlottes", emoji: "🍎", sous_titre: "La pièce signature, à partager", ordre: 1, actif: true },
-    { id: 2, nom: "Beignets", emoji: "🍩", sous_titre: "Moelleux, garnis à la commande", ordre: 2, actif: true },
+    { id: 2, nom: "Beignets", emoji: "🍩", sous_titre: "Moelleux, garnis à la commande", ordre: 4, actif: true },
     { id: 3, nom: "Cookies & Biscuits", emoji: "🍪", sous_titre: "Croustillants dehors, fondants dedans", ordre: 3, actif: true },
-    { id: 4, nom: "Tiramisù & Mousses", emoji: "🍰", sous_titre: "En verrine individuelle", ordre: 4, actif: true },
+    { id: 4, nom: "Tiramisù & Mousses", emoji: "🍰", sous_titre: "En verrine individuelle", ordre: 2, actif: true },
     { id: 5, nom: "Cheesecakes", emoji: "🧁", sous_titre: "Base biscuitée, crème onctueuse", ordre: 5, actif: true },
     { id: 6, nom: "Glaces & Cookies glacés", emoji: "🍨", sous_titre: "Préparés à la commande, toujours disponibles", ordre: 6, actif: true },
   ],
@@ -62,7 +62,7 @@ window.BIANCHI_DEMO = {
     { id: "p28", categorie_id: 6, nom: "Cookie glacé vanille caramel — Grand", description: "Grand cookie garni de glace vanille et caramel.", prix: 28, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "", actif: true, ordre: 6 },
   ],
   bannieres: [
-    { id: "b1", titre: "Offre du week-end", texte: "3 cookies achetés = le 4ᵉ offert, à préciser en remarque de commande.", style: "or", actif: true, ordre: 1 },
+    { id: "b1", titre: "Offre cookies : 3 achetés, le 4ᵉ offert", texte: "Ajoutée automatiquement à votre commande dès 3 cookies.", icone: "4ᵉ", style: "or", actif: true, ordre: 1 },
   ],
   commandes: [],
 };
