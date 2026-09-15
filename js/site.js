@@ -69,13 +69,14 @@
     $$("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
     $$("[data-i18n-placeholder]").forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });
     $("#closeDrawer").setAttribute("aria-label", t("close"));
-    const sel = $("#langSelect");
-    if (!sel.options.length) {
-      sel.innerHTML = Object.entries(L.LANGS).map(([k, v]) => `<option value="${k}">${v.flag} ${k.toUpperCase()}</option>`).join("");
-      sel.onchange = () => { L.set(sel.value); applyStatic(); renderAll(); };
-    }
-    sel.value = L.lang;
-    sel.setAttribute("aria-label", t("language"));
+    $$("#langSelect, #langSelectHero").forEach((sel) => {
+      if (!sel.options.length) {
+        sel.innerHTML = Object.entries(L.LANGS).map(([k, v]) => `<option value="${k}">${v.flag} ${k.toUpperCase()}</option>`).join("");
+        sel.onchange = () => { L.set(sel.value); applyStatic(); renderAll(); };
+      }
+      sel.value = L.lang;
+      sel.setAttribute("aria-label", t("language"));
+    });
     $("#tagline").textContent = `${t("tagline")}${data.parametres.adresse ? " · " + c(data.parametres, "adresse") : ""}`;
     $("#dateDesk").textContent = dateDuJour();
     $("#dateMob").textContent = dateDuJour();
@@ -87,12 +88,11 @@
     document.title = shopName();
     $("#slogan").textContent = p.slogan || "";
     $("#shopName").textContent = shopName();
-    $("#statusDesk").textContent = ouvert() ? t("orders_open") : t("orders_closed"); $("#statusMob").textContent = ouvert() ? t("orders_open") : t("orders_closed");
-    $("#dotDesk").classList.toggle("ferme", !ouvert()); $("#dotMob").classList.toggle("ferme", !ouvert());
-    $("#delaiMob").textContent = [c(p, "horaires"), ...String(c(p, "annonce") || "").split(/\s*·\s*/).filter(Boolean)].filter(Boolean).join(" · ");
-    $("#btnWaMob").hidden = !p.whatsapp;
+    $("#statusDesk").textContent = ouvert() ? t("orders_open") : t("orders_closed");
+    $("#dotDesk").classList.toggle("ferme", !ouvert());
+    $("#annonceMob").textContent = String(c(p, "annonce") || "").split(/\s*·\s*/).filter(Boolean).join(" · ");
     const wa = "https://wa.me/" + String(p.whatsapp || "").replace(/\D/g, "");
-    $("#btnWaMob").href = wa; $("#btnWaDesk").href = wa; $("#btnWaDesk").hidden = !p.whatsapp;
+    $("#btnWaTop").href = wa; $("#btnWaTop").hidden = !p.whatsapp; $("#btnWaDesk").href = wa; $("#btnWaDesk").hidden = !p.whatsapp;
     const closed = $("#closedBanner"); closed.hidden = ouvert(); $("#closedMsg").textContent = c(p, "message_ferme") || "";
 
     const maps = p.lien_maps || (p.adresse ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.adresse + " " + shopName()) : "");
@@ -571,6 +571,20 @@
   $("#modal").addEventListener("click", (e) => { if (e.target === $("#modal")) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModal(); closeDrawer(); } });
   ["#recherche", "#rechercheMob"].forEach((sel) => { const el = $(sel); if (el) el.addEventListener("input", (e) => { recherche = e.target.value; $$("#recherche, #rechercheMob").forEach((o) => { if (o !== e.target) o.value = recherche; }); renderCatalogue(); }); });
+
+  // Mobile : la barre haute n'apparaît que lorsque le bloc logo est sorti de l'écran
+  const heroIo = new IntersectionObserver((entries) => { document.body.classList.toggle("hdr", !entries[0].isIntersecting); }, { rootMargin: "-40px 0px 0px 0px", threshold: 0 });
+  heroIo.observe($("#hero"));
+  // Recherche cachée : tirer la page vers le bas tout en haut (ou la loupe) la fait apparaître
+  const reveal = $("#searchReveal");
+  function openSearch(focus) { reveal.classList.add("open"); if (focus) setTimeout(() => $("#rechercheMob").focus(), 250); }
+  function closeSearch() { if (!recherche) reveal.classList.remove("open"); }
+  $("#searchToggle").onclick = () => { if (reveal.classList.contains("open")) { reveal.classList.remove("open"); } else { window.scrollTo({ top: 0, behavior: "smooth" }); openSearch(true); } };
+  let touchY = null;
+  document.addEventListener("touchstart", (e) => { touchY = window.scrollY <= 0 ? e.touches[0].clientY : null; }, { passive: true });
+  document.addEventListener("touchmove", (e) => { if (touchY !== null && window.scrollY <= 0 && e.touches[0].clientY - touchY > 70) { touchY = null; openSearch(true); } }, { passive: true });
+  document.addEventListener("wheel", (e) => { if (window.scrollY <= 0 && e.deltaY < -30) openSearch(false); }, { passive: true });
+  window.addEventListener("scroll", () => { if (window.scrollY > 260) closeSearch(); }, { passive: true });
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"); if (a) $("#catnav").scrollTo({ left: a.offsetLeft - 20, behavior: "smooth" }); } });
