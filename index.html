@@ -15,61 +15,63 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap">
-  <link rel="stylesheet" href="css/base.css?v=4">
-  <link rel="stylesheet" href="css/site.css?v=5">
+  <link rel="stylesheet" href="css/base.css?v=7">
+  <link rel="stylesheet" href="css/site.css?v=7">
 </head>
 <body>
 
   <header class="topbar">
-    <a class="brand" href="#top" aria-label="Bianchi Dessert"><img src="assets/logo.png" alt=""><span><b>BIANCHI</b><small>Dessert</small></span></a>
-    <nav class="topbar-nav" id="navDesk" aria-label="Catégories"></nav>
-    <div class="topbar-right">
-      <span class="topbar-status"><span class="status-dot" id="dotDesk"></span><span id="statusDesk">—</span></span>
-      <a class="btn btn-outline-gold btn-sm topbar-wa" id="btnWaDesk" target="_blank" rel="noopener" hidden>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-13.2 8L3 21l1.1-4.6A9 9 0 1 1 21 12Z"/></svg><span data-i18n="whatsapp">WhatsApp</span>
-      </a>
-      <label class="lang-switch"><span class="sr-only" data-i18n="language">Langue</span><select id="langSelect" aria-label="Langue"></select></label>
+    <div class="topbar-inner">
+      <a class="brand" href="#top" aria-label="Bianchi Dessert"><img src="assets/logo.png" alt=""><span><b>BIANCHI</b><small>Dessert</small></span></a>
+      <label class="search topbar-search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="recherche" data-i18n-placeholder="search_placeholder" placeholder="Rechercher un dessert…" autocomplete="off">
+      </label>
+      <div class="topbar-right">
+        <span class="topbar-status"><span class="status-dot" id="dotDesk"></span><span id="statusDesk">—</span></span>
+        <a class="btn btn-outline-gold btn-sm topbar-wa" id="btnWaDesk" target="_blank" rel="noopener" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-13.2 8L3 21l1.1-4.6A9 9 0 1 1 21 12Z"/></svg><span data-i18n="whatsapp">WhatsApp</span>
+        </a>
+        <label class="lang-switch"><span class="sr-only" data-i18n="language">Langue</span><select id="langSelect" aria-label="Langue"></select></label>
+      </div>
     </div>
   </header>
 
   <div class="closed-banner" id="closedBanner" hidden><span class="ic">🌙</span><div><b data-i18n="closed_title">Rideau baissé, commandes fermées</b><span id="closedMsg"></span></div></div>
   <div class="pending-banner" id="pendingBanner" hidden></div>
-  <div class="annonce" id="annonce" hidden><div class="annonce-track" id="annonceTrack"></div></div>
+  <div class="annonce" id="annonce" hidden><span id="annonceTxt"></span></div>
 
   <div class="layout" id="top">
     <aside class="col-brand">
-      <img class="logo" src="assets/logo.png" alt="Logo Bianchi Dessert" width="168" height="168">
-      <div>
+      <img class="logo" src="assets/logo.png" alt="Logo Bianchi Dessert" width="200" height="200">
+      <div class="brand-text">
         <p class="slogan" id="slogan">Per l'amor del gusto</p>
         <div class="tagline" id="tagline"></div>
       </div>
-      <div class="head-day">
-        <div>
-          <div class="eyebrow" id="dateDesk"></div>
-          <h1><span data-i18n="showcase_a">La vitrine</span><br><em data-i18n="showcase_b">du jour</em></h1>
-        </div>
+      <div class="head-day desk">
+        <div class="eyebrow" id="dateDesk"></div>
+        <h1><span data-i18n="showcase_a">La vitrine</span><br><em data-i18n="showcase_b">du jour</em></h1>
       </div>
-      <p class="intro" data-i18n="intro"></p>
-      <div class="status-line">
+      <p class="intro desk" data-i18n="intro"></p>
+      <ul class="infos-list desk" id="infosDesk"></ul>
+      <div class="status-line mob">
         <div class="txt">
           <b><span class="status-dot" id="dotMob"></span><span id="statusMob">—</span></b>
           <small id="delaiMob"></small>
         </div>
-        <a class="btn btn-outline-gold btn-sm" id="btnWaMob" target="_blank" rel="noopener">
+        <a class="btn btn-outline-gold btn-sm" id="btnWaMob" target="_blank" rel="noopener" aria-label="WhatsApp">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-13.2 8L3 21l1.1-4.6A9 9 0 1 1 21 12Z"/></svg><span data-i18n="whatsapp">WhatsApp</span>
         </a>
       </div>
-      <p class="reassure" id="reassure"></p>
-      <label class="search">
+      <label class="search mob">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input type="search" id="recherche" data-i18n-placeholder="search_placeholder" placeholder="Rechercher un dessert…" autocomplete="off">
+        <input type="search" id="rechercheMob" data-i18n-placeholder="search_placeholder" placeholder="Rechercher un dessert…" autocomplete="off">
       </label>
-      <ul class="infos-list" id="infosDesk"></ul>
-      <div class="bannieres desk" id="bannieresDesk"></div>
     </aside>
 
     <main class="col-main">
-      <div class="head-day">
+      <div class="bannieres" id="bannieres"></div>
+      <div class="head-day mob">
         <div>
           <div class="eyebrow" id="dateMob"></div>
           <h1><span data-i18n="showcase_a">La vitrine</span> <em data-i18n="showcase_b">du jour</em></h1>
@@ -78,8 +80,11 @@
       </div>
       <nav class="catnav" id="catnav" aria-label="Catégories"></nav>
       <div id="catalogue"></div>
-      <div class="bannieres mob" id="bannieresMob"></div>
-      <ul class="foot-info" id="footInfo"></ul>
+      <div class="foot-info">
+        <p class="intro mob" data-i18n="intro"></p>
+        <p class="reassure" id="reassure"></p>
+        <ul id="footInfo"></ul>
+      </div>
     </main>
   </div>
 
@@ -107,10 +112,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="js/config.js"></script>
-  <script src="js/i18n.js"></script>
+  <script src="js/i18n.js?v=7"></script>
   <script src="js/catalogue-traductions.js"></script>
-  <script src="js/demo-data.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/site.js"></script>
+  <script src="js/demo-data.js?v=7"></script>
+  <script src="js/data.js?v=7"></script>
+  <script src="js/site.js?v=7"></script>
 </body>
 </html>

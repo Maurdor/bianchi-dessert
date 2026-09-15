@@ -38,6 +38,15 @@
     window.dispatchEvent(new CustomEvent("bianchi:change"));
   }
 
+  // Numéro de commande lisible : année (2 chiffres) + mois + jour + rang du jour. Ex. 269151 = 1re commande du 15/9/2026.
+  function codeCommande(commandes) {
+    const now = new Date();
+    const jour = now.toLocaleDateString("fr-CA", { timeZone: "Africa/Casablanca" }); // AAAA-MM-JJ
+    const [y, m, dd] = jour.split("-");
+    const n = commandes.filter((c) => new Date(c.created_at).toLocaleDateString("fr-CA", { timeZone: "Africa/Casablanca" }) === jour).length + 1;
+    return `${y.slice(2)}${Number(m)}${Number(dd)}${n}`;
+  }
+
   const demo = {
     mode: "demo",
     async getCatalogue() {
@@ -68,13 +77,14 @@
       const seuil = Number(d.parametres.livraison_offerte_des || 0);
       if (client.mode === "livraison" && d.parametres.livraison_active && !(seuil > 0 && total >= seuil)) total += Number(d.parametres.frais_livraison || 0);
       const numero = (d.commandes.reduce((m, c) => Math.max(m, c.numero || 0), 0) || 0) + 1;
+      const code = codeCommande(d.commandes);
       const commande = {
-        id: uid(), numero, ...client, articles: lignes, total, statut: "en_attente", whatsapp_envoye: false,
+        id: uid(), numero, code, ...client, articles: lignes, total, statut: "en_attente", whatsapp_envoye: false,
         created_at: new Date().toISOString(),
       };
       d.commandes.unshift(commande);
       saveLocal(d);
-      return { id: commande.id, numero, total, articles: lignes };
+      return { id: commande.id, numero, code, total, articles: lignes };
     },
 
     async marquerEnvoyee(id) { const d = loadLocal(); const cmd = d.commandes.find((x) => x.id === id); if (cmd) { cmd.whatsapp_envoye = true; saveLocal(d); } },

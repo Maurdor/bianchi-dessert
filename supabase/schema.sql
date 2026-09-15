@@ -68,6 +68,7 @@ create table if not exists public.parametres (
 create table if not exists public.commandes (
   id             uuid primary key default gen_random_uuid(),
   numero         serial,
+  code           text,                       -- AAMJN : 269151 = 1re commande du 15/9/2026
   client_nom     text not null,
   client_tel     text not null,
   mode           text not null default 'retrait',
@@ -135,6 +136,9 @@ declare
   v_lignes   jsonb := '[]'::jsonb;
   v_id       uuid;
   v_numero   int;
+  v_code     text;
+  v_jour     date := (now() at time zone 'Africa/Casablanca')::date;
+  v_rang     int;
   v_mode     text := coalesce(p_client->>'mode', 'retrait');
 begin
   select * into v_param from public.parametres where id = 1;
@@ -172,8 +176,13 @@ begin
     v_total := v_total + coalesce(v_param.frais_livraison, 0);
   end if;
 
-  insert into public.commandes (client_nom, client_tel, mode, adresse, gps_lat, gps_lng, date_souhaitee, creneau, remarque, articles, total, langue)
+  select count(*) + 1 into v_rang from public.commandes
+    where (created_at at time zone 'Africa/Casablanca')::date = v_jour;
+  v_code := to_char(v_jour, 'YY') || extract(month from v_jour)::int || extract(day from v_jour)::int || v_rang;
+
+  insert into public.commandes (code, client_nom, client_tel, mode, adresse, gps_lat, gps_lng, date_souhaitee, creneau, remarque, articles, total, langue)
   values (
+    v_code,
     left(coalesce(p_client->>'client_nom', ''), 120),
     left(coalesce(p_client->>'client_tel', ''), 30),
     v_mode,
@@ -187,7 +196,7 @@ begin
     left(coalesce(p_client->>'langue', 'fr'), 5)
   ) returning id, numero into v_id, v_numero;
 
-  return jsonb_build_object('id', v_id, 'numero', v_numero, 'total', v_total, 'articles', v_lignes);
+  return jsonb_build_object('id', v_id, 'numero', v_numero, 'code', v_code, 'total', v_total, 'articles', v_lignes);
 end;
 $$;
 grant execute on function public.passer_commande(jsonb, jsonb) to anon, authenticated;
@@ -323,6 +332,7 @@ alter table public.commandes  add column if not exists langue text default 'fr';
 alter table public.commandes  add column if not exists gps_lat double precision;
 alter table public.commandes  add column if not exists gps_lng double precision;
 alter table public.commandes  add column if not exists creneau text default 'asap';
+alter table public.commandes  add column if not exists code text;
 alter table public.commandes  add column if not exists whatsapp_envoye boolean default false;
 alter table public.parametres add column if not exists livraison_offerte_des numeric(10,2) default 0;
 

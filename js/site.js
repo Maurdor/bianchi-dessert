@@ -106,11 +106,16 @@
 
     const ann = $("#annonce");
     const annonce = c(p, "annonce");
-    if (annonce) { const seq = annonce.split(/\s*·\s*/).filter(Boolean).map((s) => `<span>${esc(s)}</span>`).join(""); $("#annonceTrack").innerHTML = seq + seq; ann.hidden = false; } else ann.hidden = true;
+    clearInterval(renderInfos._rot);
+    if (annonce) {
+      const items = annonce.split(/\s*·\s*/).filter(Boolean); let i = 0;
+      const el = $("#annonceTxt"); el.textContent = items[0]; ann.hidden = false;
+      if (items.length > 1) renderInfos._rot = setInterval(() => { el.classList.add("fade"); setTimeout(() => { i = (i + 1) % items.length; el.textContent = items[i]; el.classList.remove("fade"); }, 350); }, 5000);
+    } else ann.hidden = true;
 
     const b = (data.bannieres || []).filter((x) => x.actif).sort((x, y) => (x.ordre || 0) - (y.ordre || 0));
     const bh = b.map((x) => `<div class="banniere banniere-${esc(x.style || "blanc")}"><div class="banniere-icon">${esc(x.icone || "✨")}</div><div><h3>${esc(c(x, "titre"))}</h3>${c(x, "texte") ? `<p>${esc(c(x, "texte"))}</p>` : ""}</div></div>`).join("");
-    $("#bannieresDesk").innerHTML = bh; $("#bannieresMob").innerHTML = bh;
+    $("#bannieres").innerHTML = bh;
   }
 
   // ---------- Catalogue ----------
@@ -135,11 +140,11 @@
     if (orphelins.length) sections.push({ id: "autres", nom: t("others"), produits: orphelins });
 
     const navHtml = sections.map((s, i) => `<a href="#${s.id}" data-target="${s.id}"${i === 0 ? ' class="active"' : ""}>${esc(s.nom)}</a>`).join("");
-    $("#catnav").innerHTML = navHtml; $("#navDesk").innerHTML = navHtml;
+    $("#catnav").innerHTML = navHtml;
 
     const main = $("#catalogue");
     if (!sections.length) { main.innerHTML = `<p class="empty">${q ? esc(t("no_match", { q: recherche })) : esc(t("catalogue_soon"))}</p>`; return; }
-    main.innerHTML = `<div class="head-count"><h2>${esc(t("n_available", { n: nbDispo }))}</h2><small>${esc(dateDuJour())}</small></div>${vedette ? featuredCard(vedette) : ""}` + sections.map((s, i) => {
+    main.innerHTML = `<div class="head-count"><h2>${esc(t("n_available", { n: nbDispo }))}</h2></div>${vedette ? featuredCard(vedette) : ""}` + sections.map((s, i) => {
       const avail = s.produits.filter(dispo), sold = s.produits.filter((p) => !dispo(p));
       return `<section class="section${i === 0 ? " first" : ""}" id="${s.id}">
         <div class="section-head"><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div>
@@ -235,8 +240,32 @@
   // ---------- GPS ----------
   const mapsUrl = (g) => `https://maps.google.com/?q=${Number(g.lat).toFixed(6)},${Number(g.lng).toFixed(6)}`;
   function gpsHtml() {
-    if (gps) return `<div class="gps-ok">📍 <b>${esc(t("gps_ok"))}</b> <small>(${esc(t("gps_precision", { m: Math.round(gps.precision || 0) }))})</small><a href="${mapsUrl(gps)}" target="_blank" rel="noopener">${esc(t("gps_view"))}</a><button type="button" class="linkish" id="gpsRetry">${esc(t("gps_retry"))}</button></div>`;
+    if (gps) return `<div class="gps-ok">📍 <b>${esc(gps.manuel ? t("gps_adjusted") : t("gps_ok"))}</b> ${gps.manuel ? "" : `<small>(${esc(t("gps_precision", { m: Math.round(gps.precision || 0) }))})</small>`}<a href="${mapsUrl(gps)}" target="_blank" rel="noopener">${esc(t("gps_view"))}</a></div>
+      <div class="gps-actions"><button type="button" class="btn btn-ghost btn-sm" id="gpsAdjust">🗺️ ${esc(t("gps_adjust"))}</button><button type="button" class="linkish" id="gpsRetry">${esc(t("gps_retry"))}</button></div>
+      <div id="gpsMapWrap" hidden><div class="gps-map" id="gpsMap"></div><div class="gps-map-hint">${esc(t("gps_adjust_hint"))}</div></div>`;
     return `<button type="button" class="btn btn-ghost btn-block" id="gpsBtn">📍 ${esc(t("share_gps"))}</button>`;
+  }
+  // Carte Leaflet chargée à la demande (OpenStreetMap, gratuit)
+  let leafletReady = null;
+  function loadLeaflet() {
+    if (leafletReady) return leafletReady;
+    leafletReady = new Promise((res, rej) => {
+      const css = document.createElement("link"); css.rel = "stylesheet"; css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(css);
+      const js = document.createElement("script"); js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; js.onload = res; js.onerror = rej; document.head.appendChild(js);
+    });
+    return leafletReady;
+  }
+  async function ouvrirCarte() {
+    const wrap = $("#gpsMapWrap"); if (!wrap || !gps) return;
+    wrap.hidden = false;
+    try { await loadLeaflet(); } catch { toast(t("gps_err"), true); return; }
+    const map = window.L.map("gpsMap", { zoomControl: true }).setView([gps.lat, gps.lng], 18);
+    window.L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+    const marker = window.L.marker([gps.lat, gps.lng], { draggable: true }).addTo(map);
+    const maj = (ll) => { gps = { lat: ll.lat, lng: ll.lng, precision: 0, manuel: true }; const ok = $("#gpsBloc .gps-ok"); if (ok) ok.innerHTML = `📍 <b>${esc(t("gps_adjusted"))}</b><a href="${mapsUrl(gps)}" target="_blank" rel="noopener">${esc(t("gps_view"))}</a>`; };
+    marker.on("dragend", () => maj(marker.getLatLng()));
+    map.on("click", (e) => { marker.setLatLng(e.latlng); maj(e.latlng); });
+    setTimeout(() => map.invalidateSize(), 100);
   }
   function demanderGps(silencieux) {
     const bloc = $("#gpsBloc"); if (!bloc) return;
@@ -251,6 +280,7 @@
   function wireGps() {
     const b = $("#gpsBtn"); if (b) b.onclick = () => demanderGps(false);
     const r = $("#gpsRetry"); if (r) r.onclick = () => demanderGps(false);
+    const a = $("#gpsAdjust"); if (a) a.onclick = () => { a.disabled = true; ouvrirCarte(); };
   }
 
   // ---------- Tiroir ----------
@@ -362,7 +392,7 @@
       const res = await api.passerCommande({ client, articles });
       confirmation = { ...res, client, mode, date, creneau, remarque, heure: new Date().toISOString() };
       cart = {}; saveCart();
-      saveLast({ id: res.id, numero: res.numero, msg: messageWhatsApp(confirmation), ts: Date.now(), envoyee: false });
+      saveLast({ id: res.id, numero: res.code || res.numero, msg: messageWhatsApp(confirmation), ts: Date.now(), envoyee: false });
       await recharger();
       renderDrawer();
       $("#drawerBody").scrollTop = 0;
@@ -392,28 +422,29 @@
   // Message WhatsApp : en français pour le pâtissier, noms de produits en français, langue du client indiquée.
   function messageWhatsApp(cf) {
     const fmt = (n) => `${Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} DH`;
-    const lignes = cf.articles.map((l) => `• ${l.qte}× ${l.nom} — ${fmt(l.prix * l.qte)}`).join("\n");
+    const ref = cf.code || cf.numero;
+    const lignes = cf.articles.map((l) => `- ${l.qte} x ${l.nom} : ${fmt(l.prix * l.qte)}`).join("\n");
     const fl = fraisLivraison(cf.mode);
-    const dateFr = cf.date ? new Date(cf.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "";
-    const langue = L.LANGS[L.lang] ? `${L.LANGS[L.lang].flag} ${L.LANGS[L.lang].nom}` : L.lang;
+    const dateFr = cf.date ? new Date(cf.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "aujourd'hui";
+    const quand = new Date(cf.heure || Date.now()).toLocaleString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    const langue = L.LANGS[L.lang] ? L.LANGS[L.lang].nom : L.lang;
     return [
-      `🍰 *Commande ${shopName()} n°${cf.numero}*`,
+      `*COMMANDE ${shopName().toUpperCase()} n° ${ref}*`,
+      `Passee sur le site le ${quand}`,
       ``,
-      `👤 ${cf.client.client_nom} · ${cf.client.client_tel}`,
-      cf.mode === "livraison" ? `🛵 Livraison${cf.client.gps_lat ? " (position GPS)" : ""}` : `🛍️ À emporter`,
-      cf.mode === "livraison" && cf.client.gps_lat ? `📍 ${mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng })}` : null,
-      cf.mode === "livraison" && cf.client.adresse ? `🏠 ${cf.client.adresse}` : null,
-      dateFr || cf.creneau ? `📅 ${dateFr ? "Pour " + dateFr + " · " : ""}${CRENEAU_FR[cf.creneau] || CRENEAU_FR.asap}` : null,
-      L.lang !== "fr" ? `🌐 Langue du client : ${langue}` : null,
+      `Client : ${cf.client.client_nom} - ${cf.client.client_tel}`,
+      cf.mode === "livraison" ? (cf.client.gps_lat ? `Livraison (position GPS) : ${mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng })}` : `Livraison`) : `A emporter`,
+      cf.mode === "livraison" && cf.client.adresse ? `Adresse / complement : ${cf.client.adresse}` : null,
+      `Pour : ${dateFr} - ${CRENEAU_FR[cf.creneau] || CRENEAU_FR.asap}`,
+      L.lang !== "fr" ? `Langue du client : ${langue}` : null,
       ``,
       lignes,
-      fl ? `• Livraison — ${fmt(fl)}` : null,
+      fl ? `- Livraison : ${fmt(fl)}` : (cf.mode === "livraison" ? `- Livraison offerte` : null),
       ``,
-      `💰 *Total : ${fmt(cf.total)}* · à régler à la réception`,
-      cf.remarque ? `📝 ${cf.remarque}` : null,
+      `*TOTAL : ${fmt(cf.total)}* (a regler a la reception)`,
+      cf.remarque ? `Remarque : ${cf.remarque}` : null,
       ``,
-      `_Commande passée sur le site le ${new Date(cf.heure || Date.now()).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}, stock réservé._`,
-      `🔗 ${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${cf.numero}`,
+      `Stock reserve. Ouvrir la commande : ${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${ref}`,
     ].filter((x) => x !== null).join("\n");
   }
 
@@ -424,7 +455,7 @@
     $("#drawerBody").innerHTML = `
       <div class="confirm">
         <div class="check">✓</div>
-        <div class="eyebrow">${esc(t("order_no", { n: cf.numero }))}</div>
+        <div class="eyebrow">${esc(t("order_no", { n: cf.code || cf.numero }))}</div>
         <h3>${esc(t("stock_reserved_a"))} <em>${esc(t("stock_reserved_b"))}</em></h3>
         <p>${esc(t("confirm_text", { shop: shopName() }))}</p>
         ${L.lang !== "fr" ? `<p><small>${esc(t("confirm_lang_note"))}</small></p>` : ""}
@@ -507,7 +538,7 @@
   $("#overlay").onclick = closeDrawer;
   $("#modal").addEventListener("click", (e) => { if (e.target === $("#modal")) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModal(); closeDrawer(); } });
-  $("#recherche").addEventListener("input", (e) => { recherche = e.target.value; renderCatalogue(); });
+  ["#recherche", "#rechercheMob"].forEach((sel) => { const el = $(sel); if (el) el.addEventListener("input", (e) => { recherche = e.target.value; $$("#recherche, #rechercheMob").forEach((o) => { if (o !== e.target) o.value = recherche; }); renderCatalogue(); }); });
 
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); });
