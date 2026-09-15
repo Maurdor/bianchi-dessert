@@ -1,12 +1,12 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 9,
+  version: 10,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
     slogan: "Per l'amor del gusto",
-    whatsapp: "212600000000",
+    whatsapp: "212708302308",
     adresse: "Diar Tamouda – Wiqayah, Tétouan",
     lien_maps: "",
     horaires: "Mardi – Dimanche · 9h – 20h",
