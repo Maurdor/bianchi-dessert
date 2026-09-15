@@ -1,7 +1,7 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 3,
+  version: 4,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
@@ -28,7 +28,7 @@ window.BIANCHI_DEMO = {
     { id: 6, nom: "Glaces & Cookies glacés", emoji: "🍨", sous_titre: "Préparés à la commande, toujours disponibles", ordre: 6, actif: true },
   ],
   produits: [
-    { id: "p01", categorie_id: 1, nom: "Charlotte aux pommes cannelle", description: "Biscuits cuillère, compotée de pommes à la cannelle et crème légère.", prix: 30, ancien_prix: null, promo_label: "Best-seller", stock: 4, suivre_stock: true, image_url: "", actif: true, ordre: 1 },
+    { id: "p01", categorie_id: 1, nom: "Charlotte aux pommes cannelle", description: "Biscuits cuillère, compotée de pommes à la cannelle et crème légère.", prix: 30, ancien_prix: null, promo_label: "Best-seller", stock: 4, suivre_stock: true, image_url: "assets/produits/charlotte-pommes.jpg", actif: true, ordre: 1 },
 
     { id: "p02", categorie_id: 2, nom: "Mini Beignet Pomme", description: "Beignet moelleux garni de compotée de pommes.", prix: 8, ancien_prix: null, promo_label: "", stock: 3, suivre_stock: true, image_url: "assets/produits/mini-beignet-pomme.jpg", actif: true, ordre: 1 },
     { id: "p03", categorie_id: 2, nom: "Mini Beignet Nutella", description: "Beignet moelleux, cœur Nutella généreux.", prix: 8, ancien_prix: null, promo_label: "", stock: 8, suivre_stock: true, image_url: "assets/produits/mini-beignet-nutella.jpg", actif: true, ordre: 2 },
