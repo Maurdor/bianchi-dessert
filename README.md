@@ -26,6 +26,14 @@ supabase/schema.sql Script à exécuter une fois dans Supabase
 netlify.toml        Config Netlify
 ```
 
+## Site en ligne
+
+- **Site** : https://maurdor.github.io/bianchi-dessert/
+- **Espace pâtissier** : https://maurdor.github.io/bianchi-dessert/admin.html
+- **Code** : https://github.com/Maurdor/bianchi-dessert (hébergé gratuitement par GitHub Pages, branche `main`). Chaque `git push` remet le site à jour en une minute.
+
+Tant que les clés Supabase ne sont pas renseignées dans `js/config.js`, le site en ligne tourne en **mode démo** : chaque visiteur voit le catalogue de départ dans son propre navigateur, rien n'est partagé. L'étape 1 ci-dessous (Supabase) est donc indispensable avant de donner l'adresse aux clients.
+
 ## Tester tout de suite (mode démo)
 
 Ouvrez `index.html` dans un navigateur (ou servez le dossier avec `python3 -m http.server`). Sans clés Supabase, le site tourne en **mode démo** : les données restent dans le navigateur. L'admin est accessible sur `admin.html` avec le code **1234** (modifiable dans `js/config.js`).
