@@ -1,7 +1,7 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 7,
+  version: 8,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
@@ -29,7 +29,7 @@ window.BIANCHI_DEMO = {
     { id: 7, nom: "Boissons maison", emoji: "🥤", sous_titre: "Pressées et préparées à la commande", ordre: 7, actif: true },
   ],
   produits: [
-    { id: "p01", categorie_id: 1, nom: "Charlotte aux pommes cannelle", description: "Biscuits cuillère, compotée de pommes à la cannelle et crème légère.", prix: 30, ancien_prix: null, promo_label: "Best-seller", stock: 4, suivre_stock: true, image_url: "assets/produits/charlotte-pommes.jpg", actif: true, ordre: 1 },
+    { id: "p01", categorie_id: 1, nom: "Charlotte aux pommes cannelle", description: "Biscuits cuillère, compotée de pommes à la cannelle et crème légère.", prix: 30, ancien_prix: null, promo_label: "Best-seller", stock: 4, suivre_stock: true, image_url: "assets/produits/charlotte-pommes.jpg", actif: true, ordre: 1, vedette: true },
 
     { id: "p02", categorie_id: 2, nom: "Mini Beignet Pomme", description: "Beignet moelleux garni de compotée de pommes.", prix: 8, ancien_prix: null, promo_label: "", stock: 3, suivre_stock: true, image_url: "assets/produits/mini-beignet-pomme.jpg", actif: true, ordre: 1 },
     { id: "p03", categorie_id: 2, nom: "Mini Beignet Nutella", description: "Beignet moelleux, cœur Nutella généreux.", prix: 8, ancien_prix: null, promo_label: "", stock: 8, suivre_stock: true, image_url: "assets/produits/mini-beignet-nutella.jpg", actif: true, ordre: 2 },
@@ -48,7 +48,7 @@ window.BIANCHI_DEMO = {
     { id: "p14", categorie_id: 4, nom: "Tiramisu Nutella", description: "Mascarpone, biscuits imbibés et Nutella.", prix: 20, ancien_prix: null, promo_label: "", stock: 3, suivre_stock: true, image_url: "", actif: true, ordre: 1 },
     { id: "p15", categorie_id: 4, nom: "Tiramisu Café", description: "Le classique : mascarpone, café et cacao.", prix: 20, ancien_prix: null, promo_label: "", stock: 2, suivre_stock: true, image_url: "assets/produits/tiramisu-cafe.jpg", actif: true, ordre: 2 },
     { id: "p16", categorie_id: 4, nom: "Tiramisu Mangue / Citron", description: "Version fruitée et acidulée.", prix: 25, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 3 },
-    { id: "p17", categorie_id: 4, nom: "Tiramisu Pistache", description: "Mascarpone et crème de pistache.", prix: 29, ancien_prix: null, promo_label: "Nouveau", stock: 6, suivre_stock: true, image_url: "assets/produits/tiramisu-pistache.jpg", actif: true, ordre: 4, vedette: true },
+    { id: "p17", categorie_id: 4, nom: "Tiramisu Pistache", description: "Mascarpone et crème de pistache.", prix: 29, ancien_prix: null, promo_label: "Nouveau", stock: 6, suivre_stock: true, image_url: "assets/produits/tiramisu-pistache.jpg", actif: true, ordre: 4 },
     { id: "p18", categorie_id: 4, nom: "Mousse au chocolat", description: "Chocolat noir intense, texture aérienne.", prix: 25, ancien_prix: null, promo_label: "", stock: 5, suivre_stock: true, image_url: "", actif: true, ordre: 5 },
 
     { id: "p19", categorie_id: 5, nom: "Cheesecake Lotus", description: "Base spéculoos et nappage Lotus.", prix: 20, ancien_prix: null, promo_label: "", stock: 0, suivre_stock: true, image_url: "", actif: true, ordre: 1 },

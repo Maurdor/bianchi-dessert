@@ -360,8 +360,8 @@ update public.produits set image_url = 'https://maurdor.github.io/bianchi-desser
 update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/supplement-caramel.jpg' where nom = 'Caramel beurre salé maison — Grand';
 update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-glace-petit.jpg' where nom = 'Cookie glacé vanille caramel — Petit';
 update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-glace-grand.jpg' where nom = 'Cookie glacé vanille caramel — Grand';
-update public.produits set vedette = true, stock = 6, promo_label = 'Nouveau' where nom = 'Tiramisu Pistache';
-update public.produits set vedette = false where nom = 'Charlotte aux pommes cannelle';
+update public.produits set stock = 6, promo_label = 'Nouveau' where nom = 'Tiramisu Pistache';
+update public.produits set vedette = true where nom = 'Charlotte aux pommes cannelle';
 
 -- ---------- TRADUCTIONS du catalogue de départ (ar · en · de · nl) ----------
 update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/charlotte-pommes.jpg' where nom = 'Charlotte aux pommes cannelle';
