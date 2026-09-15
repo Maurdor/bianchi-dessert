@@ -155,7 +155,7 @@
       const seuleVedette = avail.length === 1 && avail[0] === vedette && !sold.length;
       return `<section class="section${i === 0 ? " first" : ""}${seuleVedette ? " only-featured" : ""}${avail.length ? "" : " no-stock"}" id="${s.id}">
         <div class="section-head"><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div>
-        ${s.rows ? `<div class="rows">${avail.map(rowItem).join("")}</div>` : avail.length ? `<div class="grid">${avail.map((p) => carte(p, p === vedette)).join("")}</div>` : ""}
+        ${avail.length ? `<div class="grid">${avail.map((p) => carte(p, p === vedette)).join("")}</div>` : ""}
         ${sold.length ? `<details class="soldout"${avail.length ? "" : " open"}><summary>${esc(t("soldout_n", { n: sold.length }))}</summary><div class="grid">${sold.map((p) => carte(p)).join("")}</div></details>` : ""}
       </section>`;
     }).join("");
