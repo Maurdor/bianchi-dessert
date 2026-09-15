@@ -52,6 +52,10 @@
   const stockTxt = (p) => ({ order: t("stock_on_order"), bad: t("out_today"), warn: (p.stock === 1 ? t("stock_last") : t("stock_left", { n: p.stock })), good: t("stock_available", { n: p.stock }) })[stockKind(p)];
   const waNum = () => String(data.parametres.whatsapp || "").replace(/\D/g, "");
   const notifyLink = (p) => `<a class="notify" target="_blank" rel="noopener" href="https://wa.me/${waNum()}?text=${encodeURIComponent(t("notify_msg", { name: nomP(p) }))}">${esc(t("notify_me"))}</a>`;
+  const isSupp = (p) => !!p.supplement;
+  const suffixe = (p) => (String(p.nom).split(" — ")[1] || "").trim();
+  const suppFor = (p) => isSupp(p) ? [] : data.produits.filter((x) => isSupp(x) && x.actif !== false && x.categorie_id === p.categorie_id && (!suffixe(x) || suffixe(x) === suffixe(p)));
+  const parentDe = (sup) => cartLines().map((l) => l.p).find((x) => !isSupp(x) && x.categorie_id === sup.categorie_id && (!suffixe(sup) || suffixe(sup) === suffixe(x)));
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const dateDuJour = () => cap(L.date(new Date()));
   const shopName = () => data.parametres.nom || "Bianchi Dessert";
@@ -78,8 +82,8 @@
       sel.setAttribute("aria-label", t("language"));
     });
     $("#tagline").textContent = `${t("tagline")}${data.parametres.adresse ? " · " + c(data.parametres, "adresse") : ""}`;
-    $("#dateDesk").textContent = dateDuJour();
-    $("#dateMob").textContent = dateDuJour();
+    $("#dateDesk").textContent = `${t("batch_of_day")} · ${L.date(new Date())}`;
+    $("#dateMob").textContent = `${t("batch_of_day")} · ${L.date(new Date())}`;
   }
 
   // ---------- Infos boutique ----------
@@ -122,7 +126,7 @@
   function renderCatalogue() {
     const q = recherche.trim().toLowerCase();
     const cats = (data.categories || []).filter((x) => x.actif !== false).sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
-    const visibles = (data.produits || []).filter((p) => p.actif !== false)
+    const visibles = (data.produits || []).filter((p) => p.actif !== false && !isSupp(p))
       .filter((p) => !q || (nomP(p) + " " + c(p, "description") + " " + p.nom + " " + (p.description || "")).toLowerCase().includes(q))
       .sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
 
@@ -218,13 +222,12 @@
   };
   // Suggestions « Complétez votre commande » : complément de format, pièce du jour, autres catégories à petit prix, rareté
   function suggestionsHtml(lines, mode) {
+    lines = lines.filter((l) => !isSupp(l.p));
     if (!lines.length || lines.length >= 4) return "";
     const inCart = new Set(lines.map((l) => l.p.id)), catsIn = new Set(lines.map((l) => l.p.categorie_id));
-    const pool = data.produits.filter((p) => p.actif !== false && dispo(p) && !inCart.has(p.id));
+    const pool = data.produits.filter((p) => p.actif !== false && !isSupp(p) && dispo(p) && !inCart.has(p.id));
     const picks = [];
     const push = (p, why) => { if (p && !picks.some((x) => x.p === p) && picks.length < 3) picks.push({ p, why }); };
-    // 1. Complément de format (supplément caramel assorti à une glace)
-    lines.forEach((l) => { const suf = (String(l.p.nom).split(" — ")[1] || "").trim(); if (suf) pool.filter((p) => p.categorie_id === l.p.categorie_id && p.prix <= 5 && String(p.nom).endsWith("— " + suf)).forEach((p) => push(p, t("why_complement"))); });
     // 2. Combler la livraison offerte : le produit le moins cher qui atteint le seuil
     const seuil = seuilOffert(), reste = seuil - sousTotal();
     if (mode === "livraison" && seuil > 0 && reste > 0 && reste <= 30) {
@@ -241,8 +244,18 @@
     return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map(({ p, why }) => `<div class="suggest-item"><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${why === t("why_last") ? "warn" : ""}">${esc(why)}${p.suivre_stock && (p.stock || 0) <= 3 ? " · " + esc(stockTxt(p)) : ""}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
   }
 
+  function syncSupplements() {
+    let changed = false;
+    for (const l of cartLines().filter((x) => isSupp(x.p))) {
+      const parent = parentDe(l.p);
+      if (!parent) { delete cart[l.p.id]; changed = true; }
+      else if (cart[l.p.id] !== cart[parent.id]) { cart[l.p.id] = cart[parent.id]; changed = true; }
+    }
+    if (changed) saveCart();
+  }
   function refreshCartUI() {
-    const n = cartLines().reduce((s0, l) => s0 + l.qte, 0);
+    syncSupplements();
+    const n = cartLines().filter((l) => !isSupp(l.p)).reduce((s0, l) => s0 + l.qte, 0);
     $("#cartCount").textContent = n;
     $("#cartFabTotal").textContent = n ? money(sousTotal()) : "";
     const lbl = $("#cartFab [data-i18n]"); if (lbl) lbl.textContent = t("order_cta");
@@ -256,7 +269,7 @@
   function gpsHtml() {
     if (gps) return `<div class="gps-ok">📍 <b>${esc(gps.manuel ? t("gps_adjusted") : t("gps_ok"))}</b> ${gps.manuel ? "" : `<small>(${esc(t("gps_precision", { m: Math.round(gps.precision || 0) }))})</small>`}<a href="${mapsUrl(gps)}" target="_blank" rel="noopener">${esc(t("gps_view"))}</a></div>
       <div class="gps-actions"><button type="button" class="btn btn-ghost btn-sm" id="gpsAdjust">🗺️ ${esc(t("gps_adjust"))}</button><button type="button" class="linkish" id="gpsRetry">${esc(t("gps_retry"))}</button></div>
-      <div id="gpsMapWrap" hidden><div class="gps-map" id="gpsMap"></div><div class="gps-map-hint">${esc(t("gps_adjust_hint"))}</div></div>`;
+      <div id="gpsMapWrap" hidden><div class="gps-map" id="gpsMap"></div><div class="gps-map-hint">${esc(t("gps_adjust_hint"))}</div><button type="button" class="btn btn-ink btn-block" id="gpsConfirm" style="margin-top:8px">${esc(t("gps_confirm"))}</button></div>`;
     return `<button type="button" class="btn btn-ghost btn-block" id="gpsBtn">📍 ${esc(t("share_gps"))}</button>`;
   }
   // Carte Leaflet chargée à la demande (OpenStreetMap, gratuit)
@@ -280,6 +293,12 @@
     marker.on("dragend", () => maj(marker.getLatLng()));
     map.on("click", (e) => { marker.setLatLng(e.latlng); maj(e.latlng); });
     setTimeout(() => map.invalidateSize(), 100);
+    $("#gpsConfirm").onclick = () => {
+      gps = { ...gps, manuel: true };
+      const bloc = $("#gpsBloc"); bloc.innerHTML = gpsHtml(); wireGps();
+      const ok = $("#gpsBloc .gps-ok b"); if (ok) ok.textContent = t("gps_confirmed");
+      toast(t("gps_confirmed"));
+    };
   }
   function demanderGps(silencieux) {
     const bloc = $("#gpsBloc"); if (!bloc) return;
@@ -315,12 +334,15 @@
     const minDate = new Date().toISOString().slice(0, 10);
     const maxDate = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
     body.innerHTML = `
-      <div>${lines.map((l) => `
+      <div>${lines.filter((l) => !isSupp(l.p)).map((l) => `
         <div class="line">
           <div class="line-name"><b>${esc(nomP(l.p))}</b><small class="num">${esc(t("unit_price", { price: money(l.p.prix) }))}${l.p.suivre_stock ? ` · ${esc(l.p.stock - l.qte <= 1 ? t("suggest_last") : t("in_stock", { n: l.p.stock }))}` : ""}</small><button class="remove" data-remove="${l.p.id}">${esc(t("remove"))}</button></div>
           <span class="stepper"><button data-moins="${l.p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${l.qte}</span><button data-plus="${l.p.id}" aria-label="${esc(t("more"))}">+</button>${l.p.prix <= 10 && l.qte < 4 && stockMax(l.p) >= 4 ? `<button class="x4" data-qty4="${l.p.id}">${esc(t("qty4"))}</button>` : ""}</span>
           <span class="line-price num">${esc(money(l.p.prix * l.qte))}</span>
-        </div>`).join("")}</div>
+        </div>
+        ${suppFor(l.p).map((sp) => cart[sp.id]
+          ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}">×</button></div>`
+          : `<button class="supp-add" data-supp="${sp.id}" data-parent="${l.p.id}">${esc(t("supp_add", { name: nomP(sp), price: money(sp.prix) }))}</button>`).join("")}`).join("")}</div>
       ${suggestionsHtml(lines, mode)}
 
       <form class="form" id="formCommande" novalidate>
@@ -467,7 +489,7 @@
       cf.mode === "livraison" && cf.client.adresse ? `Adresse / complément : ${cf.client.adresse}` : null,
       `Client : ${cf.client.client_nom} - ${cf.client.client_tel}${L.lang !== "fr" ? ` (langue : ${langue})` : ""}`,
       ``,
-      cf.articles.map((l) => `${l.qte} x ${l.nom} - ${fmt(l.prix * l.qte)}`).join("\n"),
+      cf.articles.map((l) => `${produit(l.produit_id)?.supplement ? "   + " : ""}${l.qte} x ${l.nom} - ${fmt(l.prix * l.qte)}`).join("\n"),
       cf.mode === "livraison" ? (fl ? `Livraison - ${fmt(fl)}` : `Livraison offerte`) : null,
       `*Total : ${fmt(cf.total)}, à régler à la réception*`,
       cf.remarque ? `\nRemarque : ${cf.remarque}` : null,
@@ -533,6 +555,7 @@
         <div class="row"><h3>${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
         ${c(p, "allergenes") ? `<div class="allergenes"><b>${esc(t("allergens"))}</b> ${esc(c(p, "allergenes"))}</div>` : ""}
+        ${ok && suppFor(p).length ? `<div class="opts"><div class="eyebrow">${esc(t("supp_with"))}</div>${suppFor(p).map((sp) => `<label class="opt"><input type="checkbox" data-opt="${sp.id}"${cart[sp.id] ? " checked" : ""}><span><b>${esc(nomP(sp))}</b> <small>+${esc(money(sp.prix))}</small>${c(sp, "description") ? `<br><small>${esc(c(sp, "description"))}</small>` : ""}</span></label>`).join("")}</div>` : ""}
         <div class="modal-foot">
           <span class="stepper lg"><button id="mMoins" aria-label="${esc(t("less"))}">−</button><span id="mQty" class="num">1</span><button id="mPlus" aria-label="${esc(t("more"))}">+</button></span>
           ${ok ? `<button class="btn btn-ink" id="mAdd">${esc(t("add"))} · <span class="num" id="mTotal">${esc(money(p.prix))}</span></button>` : `<a class="btn btn-outline-gold" target="_blank" rel="noopener" href="https://wa.me/${waNum()}?text=${encodeURIComponent(t("notify_msg", { name: nomP(p) }))}">${esc(t("notify_me"))}</a>`}
@@ -543,7 +566,11 @@
     const upd = () => { $("#mQty").textContent = modalQty; const el = $("#mTotal"); if (el) el.textContent = money(p.prix * modalQty); };
     $("#mMoins").onclick = () => { modalQty = Math.max(1, modalQty - 1); upd(); };
     $("#mPlus").onclick = () => { const max = Math.max(1, stockMax(p) - (cart[p.id] || 0)); if (modalQty >= max) { toast(t("max_stock", { n: stockMax(p) }), true); return; } modalQty++; upd(); };
-    const add = $("#mAdd"); if (add) add.onclick = () => { addToCart(p.id, modalQty); closeModal(); };
+    const add = $("#mAdd"); if (add) add.onclick = () => {
+      addToCart(p.id, modalQty);
+      $$("[data-opt]", $("#modalCard")).forEach((cb) => { const sp = produit(cb.dataset.opt); if (!sp) return; if (cb.checked) cart[sp.id] = cart[p.id]; else delete cart[sp.id]; });
+      saveCart(); refreshCartUI(); closeModal();
+    };
     $("#modalClose").onclick = closeModal;
     document.body.style.overflow = "hidden";
     setTimeout(() => $("#modalClose")?.focus(), 200);
@@ -552,11 +579,12 @@
 
   // ---------- Événements ----------
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-open],[data-target]");
+    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-supp],[data-open],[data-target]");
     if (!el) return;
     if (el.dataset.plus) { e.preventDefault(); addToCart(el.dataset.plus); }
     else if (el.dataset.moins) { e.preventDefault(); removeFromCart(el.dataset.moins); }
     else if (el.dataset.remove) removeFromCart(el.dataset.remove, 999);
+    else if (el.dataset.supp) { const sp = produit(el.dataset.supp), par = produit(el.dataset.parent); if (sp && par && cart[par.id]) { cart[sp.id] = cart[par.id]; saveCart(); toast(t("toast_added", { name: nomP(sp) })); refreshCartUI(); } }
     else if (el.dataset.qty4) { const p = produit(el.dataset.qty4); if (p) { cart[p.id] = Math.min(4, stockMax(p)); saveCart(); refreshCartUI(); renderCatalogue(); } }
     else if (el.dataset.open) openModal(el.dataset.open);
     else if (el.dataset.target) {

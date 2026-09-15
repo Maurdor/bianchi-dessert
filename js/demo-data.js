@@ -1,7 +1,7 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 4,
+  version: 6,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
@@ -57,8 +57,8 @@ window.BIANCHI_DEMO = {
 
     { id: "p23", categorie_id: 6, nom: "Glace Vanille Bourbon — Petit", description: "Glace artisanale à la vanille Bourbon, petit format.", prix: 12, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/glace-vanille-petit.jpg", actif: true, ordre: 1 },
     { id: "p24", categorie_id: 6, nom: "Glace Vanille Bourbon — Grand", description: "Glace artisanale à la vanille Bourbon, grand format.", prix: 20, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/glace-vanille-grand.jpg", actif: true, ordre: 2 },
-    { id: "p25", categorie_id: 6, nom: "Supplément caramel beurre salé — Petit", description: "Nappage caramel beurre salé maison pour votre glace.", prix: 2, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/supplement-caramel.jpg", actif: true, ordre: 3 },
-    { id: "p26", categorie_id: 6, nom: "Supplément caramel beurre salé — Grand", description: "Nappage caramel beurre salé maison, grand format.", prix: 4, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/supplement-caramel.jpg", actif: true, ordre: 4 },
+    { id: "p25", categorie_id: 6, nom: "Caramel beurre salé maison — Petit", description: "Caramel au beurre salé fait maison, nappé sur votre glace ou votre cookie glacé.", prix: 2, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/supplement-caramel.jpg", actif: true, ordre: 3, supplement: true },
+    { id: "p26", categorie_id: 6, nom: "Caramel beurre salé maison — Grand", description: "Caramel au beurre salé fait maison, nappé généreusement sur le grand format.", prix: 4, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/supplement-caramel.jpg", actif: true, ordre: 4, supplement: true },
     { id: "p27", categorie_id: 6, nom: "Cookie glacé vanille caramel — Petit", description: "Cookie maison garni de glace vanille et caramel.", prix: 15, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/cookie-glace-petit.jpg", actif: true, ordre: 5 },
     { id: "p28", categorie_id: 6, nom: "Cookie glacé vanille caramel — Grand", description: "Grand cookie garni de glace vanille et caramel.", prix: 28, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/cookie-glace-grand.jpg", actif: true, ordre: 6 },
   ],
