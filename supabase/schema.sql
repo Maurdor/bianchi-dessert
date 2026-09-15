@@ -276,7 +276,7 @@ create policy "photos admin" on storage.objects for all to authenticated
 
 -- ---------- CATALOGUE DE DÉPART ----------
 insert into public.parametres (id, nom, slogan, whatsapp, adresse, horaires, delai_texte, commandes_ouvertes, message_ferme, livraison_active, frais_livraison, commande_min, livraison_offerte_des, annonce)
-values (1, 'Bianchi Dessert', 'Per l''amor del gusto', '', 'Diar Tamouda – Wiqayah, Tétouan', 'Mardi – Dimanche · 9h – 20h', 'Retrait ou livraison le jour même selon le stock', true, 'Les commandes reprennent demain matin. À très vite !', true, 10, 0, 60, 'Livraison 10 DH à Tétouan, offerte dès 60 DH · Paiement à la réception · Stock du jour en direct')
+values (1, 'Bianchi Dessert', 'Per l''amor del gusto', '', 'Diar Tamouda – Wiqayah, Tétouan', 'Mardi – Dimanche · 9h – 20h', 'Retrait ou livraison le jour même selon le stock', true, 'Les commandes reprennent demain matin. À très vite !', true, 10, 0, 60, '')
 on conflict (id) do nothing;
 
 insert into public.categories (id, nom, emoji, sous_titre, ordre) values

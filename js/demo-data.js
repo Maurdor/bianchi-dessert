@@ -1,7 +1,7 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 8,
+  version: 9,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
@@ -17,7 +17,7 @@ window.BIANCHI_DEMO = {
     frais_livraison: 10,
     livraison_offerte_des: 60,
     commande_min: 0,
-    annonce: "Livraison 10 DH à Tétouan, offerte dès 60 DH · Paiement à la réception · Stock du jour en direct",
+    annonce: "",
   },
   categories: [
     { id: 1, nom: "Charlottes", emoji: "🍎", sous_titre: "La pièce signature, à partager", ordre: 1, actif: true },

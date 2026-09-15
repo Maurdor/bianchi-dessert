@@ -247,7 +247,7 @@
   const PROD_TR = [{ key: "nom", label: "Nom" }, { key: "description", label: "Description", tall: true }, { key: "promo_label", label: "Étiquette promo" }, { key: "allergenes", label: "Allergènes" }];
   const CAT_TR = [{ key: "nom", label: "Nom" }, { key: "sous_titre", label: "Sous-titre" }];
   const BAN_TR = [{ key: "titre", label: "Titre" }, { key: "texte", label: "Texte", tall: true }];
-  const PARAM_TR = [{ key: "horaires", label: "Horaires" }, { key: "delai_texte", label: "Délai affiché dans le panier" }, { key: "annonce", label: "Annonce (bandeau)", tall: true }, { key: "message_ferme", label: "Message quand les commandes sont fermées" }];
+  const PARAM_TR = [{ key: "horaires", label: "Horaires" }, { key: "delai_texte", label: "Délai affiché dans le panier" }, { key: "message_ferme", label: "Message quand les commandes sont fermées" }];
   function formProduit(p) {
     const isNew = !p.id;
     let imageUrl = p.image_url || "";
@@ -349,21 +349,14 @@
     const p = data.parametres;
     const bs = [...data.bannieres].sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
     page.innerHTML = `
-      <div class="page-head"><div><h2>Promotions</h2><p>Bannières en haut du site et annonce.</p></div>
+      <div class="page-head"><div><h2>Promotions</h2><p>Bannières en haut du site.</p></div>
         <div class="page-actions"><button class="btn btn-ink btn-sm" id="addBan">+ Bannière</button></div></div>
-      <div class="panel">
-        <h3>Annonce</h3>
-        <p class="hint">Bandeau d'informations : sur ordinateur, les messages séparés par « · » s'affichent à tour de rôle ; sur mobile, ils apparaissent en une ligne sous le titre « La vitrine du jour ». Laissez vide pour le masquer.</p>
-        <div class="field"><textarea id="annonce" placeholder="Livraison offerte dès 150 DH · Nouveau : tiramisu pistache">${esc(p.annonce || "")}</textarea></div>
-        <div class="form-actions"><button class="btn btn-ink" id="saveAnnonce">Enregistrer</button></div>
-      </div>
       <h3 style="font-size:22px;margin:6px 0 10px">Bannières</h3>
       <div class="list">${bs.map((b) => `
         <div class="item${b.actif === false ? " inactif" : ""}">
           <div class="item-main"><div class="banniere-preview banniere-${esc(b.style || "or")}"><span style="font-size:24px">${esc(b.icone || "✨")}</span><div><h4>${esc(b.titre)}</h4>${b.texte ? `<p>${esc(b.texte)}</p>` : ""}</div></div></div>
           <div class="item-actions"><button class="icon-btn" data-btoggle="${b.id}" title="${b.actif === false ? "Activer" : "Désactiver"}">${b.actif === false ? "🙈" : "👁️"}</button><button class="icon-btn" data-bedit="${b.id}">✏️</button><button class="icon-btn danger" data-bdel="${b.id}">🗑️</button></div>
         </div>`).join("") || `<p class="empty">Aucune bannière. Créez-en une pour mettre une offre en avant.</p>`}</div>`;
-    $("#saveAnnonce").onclick = async () => { await api.saveParametres({ ...p, annonce: $("#annonce").value.trim() }); toast("Annonce enregistrée"); recharger(); };
     $("#addBan").onclick = () => formBanniere({});
     page.querySelectorAll("[data-bedit]").forEach((b) => b.onclick = () => formBanniere(data.bannieres.find((x) => x.id === b.dataset.bedit)));
     page.querySelectorAll("[data-bdel]").forEach((b) => b.onclick = async () => { if (!confirm("Supprimer cette bannière ?")) return; await api.deleteBanniere(b.dataset.bdel); toast("Bannière supprimée"); recharger(); });

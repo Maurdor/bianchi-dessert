@@ -94,7 +94,6 @@
     $("#shopName").textContent = shopName();
     $("#statusDesk").textContent = ouvert() ? t("orders_open") : t("orders_closed");
     $("#dotDesk").classList.toggle("ferme", !ouvert());
-    $("#annonceMob").textContent = String(c(p, "annonce") || "").split(/\s*·\s*/).filter(Boolean).join(" · ");
     const wa = "https://wa.me/" + String(p.whatsapp || "").replace(/\D/g, "");
     $("#btnWaTop").href = wa; $("#btnWaTop").hidden = !p.whatsapp; $("#btnWaDesk").href = wa; $("#btnWaDesk").hidden = !p.whatsapp;
     const closed = $("#closedBanner"); closed.hidden = ouvert(); $("#closedMsg").textContent = c(p, "message_ferme") || "";
@@ -108,14 +107,7 @@
     $("#infosDesk").innerHTML = infos;
     $("#footInfo").innerHTML = infos + `<li class="slogan">${esc(p.slogan || "")}</li><li><a href="admin.html">${esc(t("admin_link"))}</a></li>`;
 
-    const ann = $("#annonce");
-    const annonce = c(p, "annonce");
     clearInterval(renderInfos._rot);
-    if (annonce) {
-      const items = annonce.split(/\s*·\s*/).filter(Boolean); let i = 0;
-      const el = $("#annonceTxt"); el.textContent = items[0]; ann.hidden = false;
-      if (items.length > 1) renderInfos._rot = setInterval(() => { el.classList.add("fade"); setTimeout(() => { i = (i + 1) % items.length; el.textContent = items[i]; el.classList.remove("fade"); }, 350); }, 5000);
-    } else ann.hidden = true;
 
     const b = (data.bannieres || []).filter((x) => x.actif).sort((x, y) => (x.ordre || 0) - (y.ordre || 0));
     const bh = b.map((x) => `<div class="banniere banniere-${esc(x.style || "blanc")}"><div class="banniere-icon">${esc(x.icone || "✨")}</div><div><h3>${esc(c(x, "titre"))}</h3>${c(x, "texte") ? `<p>${esc(c(x, "texte"))}</p>` : ""}</div></div>`).join("");
