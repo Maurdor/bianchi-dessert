@@ -18,7 +18,7 @@
   function loadLocal() {
     try {
       const s = localStorage.getItem(LS_KEY);
-      if (s) return appliquerTraductions(JSON.parse(s));
+      if (s) { const d = JSON.parse(s); if (d.version === window.BIANCHI_DEMO.version) return appliquerTraductions(d); }
     } catch (e) {}
     return appliquerTraductions(clone(window.BIANCHI_DEMO));
   }

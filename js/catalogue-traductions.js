@@ -53,9 +53,9 @@ window.BIANCHI_TRADUCTIONS = {
     "Édition limitée": { ar: "إصدار محدود", en: "Limited edition", de: "Limitierte Auflage", nl: "Beperkte oplage" },
   },
   parametres: {
-    ar: { horaires: "الطلبات كل يوم · 10:00 – 22:00", delai_texte: "استلام أو توصيل في نفس اليوم حسب المخزون", annonce: "توصيل 10 د.م. في تطوان، مجاني من 60 د.م. · الدفع عند الاستلام · مخزون اليوم مباشر", message_ferme: "تستأنف الطلبات صباح الغد. إلى اللقاء قريباً!" },
-    en: { horaires: "Orders every day · 10:00 – 22:00", delai_texte: "Same-day pick-up or delivery, depending on stock", annonce: "Delivery 10 DH in Tétouan, free from 60 DH · Pay on delivery · Today's stock, live", message_ferme: "Orders resume tomorrow morning. See you soon!" },
-    de: { horaires: "Bestellungen täglich · 10:00 – 22:00", delai_texte: "Abholung oder Lieferung am selben Tag, je nach Bestand", annonce: "Lieferung 10 DH in Tétouan, kostenlos ab 60 DH · Zahlung bei Übergabe · Tagesbestand live", message_ferme: "Bestellungen sind ab morgen früh wieder möglich. Bis bald!" },
-    nl: { horaires: "Bestellingen elke dag · 10:00 – 22:00", delai_texte: "Afhalen of bezorging op dezelfde dag, afhankelijk van de voorraad", annonce: "Bezorging 10 DH in Tétouan, gratis vanaf 60 DH · Betaling bij ontvangst · Voorraad van vandaag, live", message_ferme: "Bestellen kan morgenochtend weer. Tot snel!" },
+    ar: { horaires: "الثلاثاء – الأحد · 9:00 – 20:00", delai_texte: "استلام أو توصيل في نفس اليوم حسب المخزون", annonce: "توصيل 10 د.م. في تطوان، مجاني من 60 د.م. · الدفع عند الاستلام · مخزون اليوم مباشر", message_ferme: "تستأنف الطلبات صباح الغد. إلى اللقاء قريباً!" },
+    en: { horaires: "Tuesday – Sunday · 9am – 8pm", delai_texte: "Same-day pick-up or delivery, depending on stock", annonce: "Delivery 10 DH in Tétouan, free from 60 DH · Pay on delivery · Today's stock, live", message_ferme: "Orders resume tomorrow morning. See you soon!" },
+    de: { horaires: "Dienstag – Sonntag · 9 – 20 Uhr", delai_texte: "Abholung oder Lieferung am selben Tag, je nach Bestand", annonce: "Lieferung 10 DH in Tétouan, kostenlos ab 60 DH · Zahlung bei Übergabe · Tagesbestand live", message_ferme: "Bestellungen sind ab morgen früh wieder möglich. Bis bald!" },
+    nl: { horaires: "Dinsdag – zondag · 9 – 20 u", delai_texte: "Afhalen of bezorging op dezelfde dag, afhankelijk van de voorraad", annonce: "Bezorging 10 DH in Tétouan, gratis vanaf 60 DH · Betaling bij ontvangst · Voorraad van vandaag, live", message_ferme: "Bestellen kan morgenochtend weer. Tot snel!" },
   },
 };
