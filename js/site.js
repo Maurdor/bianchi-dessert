@@ -617,7 +617,7 @@
     document.documentElement.toggleAttribute("data-theme", th === "dark"); if (th === "dark") document.documentElement.setAttribute("data-theme", "dark");
     try { localStorage.setItem("bianchi_theme", th); } catch {}
     $$("[data-theme-toggle]").forEach((b) => b.setAttribute("aria-label", th === "dark" ? t("theme_light") : t("theme_dark")));
-    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = th === "dark" ? "#2b141a" : "#f8f3ea";
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = th === "dark" ? "#3f2021" : "#f8f3ea";
   }
   $$("[data-theme-toggle]").forEach((b) => b.addEventListener("click", () => applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark")));
   applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light");
