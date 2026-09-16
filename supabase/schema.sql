@@ -261,6 +261,7 @@ begin
   end if;
 end $$;
 alter publication supabase_realtime add table public.produits;
+alter publication supabase_realtime add table public.commandes;
 alter publication supabase_realtime add table public.categories;
 alter publication supabase_realtime add table public.bannieres;
 alter publication supabase_realtime add table public.parametres;
