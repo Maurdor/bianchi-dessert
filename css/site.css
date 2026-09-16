@@ -548,3 +548,20 @@ html[data-theme="dark"] .filter-btn .fcount { color: #1a0b0d; }
 .credit a { color: var(--muted); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 1px; }
 .credit a:hover { color: var(--gold-deep); }
 @media (min-width: 1024px) { .credit { text-align: end; } }
+
+/* ---------- Option F : étiquettes en languettes sur le bord de la carte ---------- */
+.card, .featured { position: relative; }
+.card.has-tabs { margin-top: 10px; padding-top: 18px; }
+.featured.has-tabs { margin-top: 26px; padding-top: 12px; }
+.featured.has-tabs .photo { border-radius: 6px; margin: 0 10px; height: 188px; }
+.card-tabs { position: absolute; top: -10px; left: 12px; right: 12px; display: flex; gap: 6px; z-index: 2; pointer-events: none; }
+.card-tabs .promo { position: static; padding: 4px 10px; font-size: 9.5px; letter-spacing: .1em; border-radius: 3px; box-shadow: 0 2px 6px rgba(36,29,22,.18); white-space: nowrap; }
+html[dir="rtl"] .card-tabs { left: 12px; right: 12px; justify-content: flex-end; }
+.photo .badges { display: none; }
+.tag { background: rgba(255,255,255,.8); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+html[data-theme="dark"] .tag { background: rgba(42,18,20,.8); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.modal-body .promo { position: static; padding: 4px 9px; font-size: 9.5px; letter-spacing: .1em; border-radius: 3px; }
+@media (max-width: 1023px) { .card-tabs .promo:nth-child(n+2) { display: none; } }
+@media (min-width: 1024px) { .grid { align-items: start; } .grid:has(> .card:only-child) .card.has-tabs { padding-top: 18px; } }
+.featured.has-tabs { overflow: visible; }
+.featured.has-tabs .photo { border-radius: 6px; overflow: hidden; }

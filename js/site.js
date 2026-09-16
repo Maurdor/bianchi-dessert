@@ -77,8 +77,8 @@
     if (bestSellerId && p.id === bestSellerId) out.push(TR.promo_labels?.["Best-seller"]?.[L.lang] || "Best-seller");
     return out;
   };
-  const badgesHtml = (p) => { const ls = labelsDe(p); return ls.length ? `<div class="badges">${ls.map((l) => `<span class="promo">${esc(l)}</span>`).join("")}</div>` : ""; };
-  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}${sansTag ? "" : `<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>`}${badgesHtml(p)}${extra}</div>`;
+  const badgesHtml = (p) => { const ls = labelsDe(p); return ls.length ? `<div class="card-tabs">${ls.map((l) => `<span class="promo">${esc(l)}</span>`).join("")}</div>` : ""; };
+  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}${sansTag ? "" : `<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>`}${extra}</div>`;
 
   // ---------- Textes statiques ----------
   function applyStatic() {
@@ -185,8 +185,9 @@
       : `<button class="plus" data-plus="${p.id}" aria-label="${esc(t("add_named", { name: nomP(p) }))}">+</button>`;
   }
   function carte(p, isFeatured = false) {
-    return `<article class="card${dispo(p) ? "" : " epuise"}${isFeatured ? " is-featured" : ""}" data-id="${p.id}">
-      ${photoHtml(p)}
+    const tabs = badgesHtml(p);
+    return `<article class="card${dispo(p) ? "" : " epuise"}${isFeatured ? " is-featured" : ""}${tabs ? " has-tabs" : ""}" data-id="${p.id}">
+      ${tabs}${photoHtml(p)}
       <div class="card-body">
         <div class="card-title" data-open="${p.id}">${esc(nomP(p))}</div>
         ${c(p, "description") ? `<p class="card-desc">${esc(c(p, "description"))}</p>` : ""}
@@ -198,8 +199,9 @@
     const q = cart[p.id] || 0;
     const action = q > 0 ? actionHtml(p) : `<button class="btn btn-ink btn-sm" data-plus="${p.id}">${esc(t("add"))}</button>`;
     const st = p.suivre_stock && (p.stock || 0) > 3 ? t("pieces_today", { n: p.stock }) : stockTxt(p);
-    return `<article class="featured" data-id="${p.id}">
-      ${photoHtml(p, "", true)}
+    const tabs = badgesHtml(p);
+    return `<article class="featured${tabs ? " has-tabs" : ""}" data-id="${p.id}">
+      ${tabs}${photoHtml(p, "", true)}
       <div class="featured-body">
         <div class="row"><h3 data-open="${p.id}">${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
@@ -562,7 +564,7 @@
       <button class="modal-close" id="modalClose" aria-label="${esc(t("close"))}">×</button>
       ${photoHtml(p, "", true).replace('data-open="' + p.id + '"', "")}
       <div class="modal-body">
-        <span class="stock-inline ${stockKind(p)}">${esc(stockTxt(p))}</span>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="stock-inline ${stockKind(p)}">${esc(stockTxt(p))}</span>${labelsDe(p).map((l) => `<span class="promo">${esc(l)}</span>`).join("")}</div>
         <div class="row"><h3>${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
         ${c(p, "allergenes") ? `<div class="allergenes"><b>${esc(t("allergens"))}</b> ${esc(c(p, "allergenes"))}</div>` : ""}
