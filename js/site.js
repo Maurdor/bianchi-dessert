@@ -121,8 +121,9 @@
   function renderAllerg() {
     const map = new Map();
     (data.produits || []).filter((p) => p.actif !== false).forEach((p) => allergTokens(p).forEach((tk) => { const k = normA(tk); if (k && !map.has(k)) { const lbl = tk.replace(/\s*\(.*?\)\s*/g, "").trim(); map.set(k, lbl.charAt(0).toUpperCase() + lbl.slice(1)); } }));
-    const html = map.size ? `<span class="lbl">${esc(t("without"))}</span>${[...map.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, label]) => `<button class="achip${sans.has(k) ? " on" : ""}" data-allerg="${esc(k)}">${esc(label)}</button>`).join("")}<small>${esc(t("allergen_note"))}</small>` : "";
-    $$("#allergDesk, #allergMob").forEach((el) => { el.innerHTML = html; el.hidden = !html; });
+    const html = map.size ? `<div class="fp-head"><b>${esc(t("without"))}</b>${sans.size ? `<button type="button" class="linkish" data-allerg-clear>${esc(t("dismiss"))}</button>` : ""}</div>${[...map.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, label]) => `<label class="fp-opt"><input type="checkbox" data-allerg="${esc(k)}"${sans.has(k) ? " checked" : ""}><span>${esc(label)}</span></label>`).join("")}<small>${esc(t("allergen_note"))}</small>` : "";
+    $$("[data-filter-pop]").forEach((el) => { el.innerHTML = html; });
+    $$("[data-filter-toggle]").forEach((b) => { b.hidden = !map.size; b.classList.toggle("on", sans.size > 0); const c0 = b.querySelector(".fcount"); c0.textContent = sans.size; c0.hidden = !sans.size; });
   }
   const exclu = (p) => sans.size > 0 && allergTokens(p).some((tk) => sans.has(normA(tk)));
 
@@ -578,13 +579,13 @@
 
   // ---------- Événements ----------
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-supp],[data-allerg],[data-open],[data-target]");
+    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-supp],[data-allerg-clear],[data-open],[data-target]");
     if (!el) return;
     if (el.dataset.plus) { e.preventDefault(); addToCart(el.dataset.plus); }
     else if (el.dataset.moins) { e.preventDefault(); removeFromCart(el.dataset.moins); }
     else if (el.dataset.remove) removeFromCart(el.dataset.remove, 999);
     else if (el.dataset.supp) { const sp = produit(el.dataset.supp), par = produit(el.dataset.parent); if (sp && par && cart[par.id]) { cart[sp.id] = cart[par.id]; saveCart(); toast(t("toast_added", { name: nomP(sp) })); refreshCartUI(); } }
-    else if (el.dataset.allerg) { const k = el.dataset.allerg; if (sans.has(k)) sans.delete(k); else sans.add(k); renderAllerg(); renderCatalogue(); observeSections(); }
+    else if (el.hasAttribute("data-allerg-clear")) { sans.clear(); renderAllerg(); renderCatalogue(); observeSections(); }
     else if (el.dataset.qty4) { const p = produit(el.dataset.qty4); if (p) { cart[p.id] = Math.min(4, stockMax(p)); saveCart(); refreshCartUI(); renderCatalogue(); } }
     else if (el.dataset.open) openModal(el.dataset.open);
     else if (el.dataset.target) {
@@ -599,6 +600,11 @@
   $("#modal").addEventListener("click", (e) => { if (e.target === $("#modal")) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModal(); closeDrawer(); } });
   ["#recherche", "#rechercheMob"].forEach((sel) => { const el = $(sel); if (el) el.addEventListener("input", (e) => { recherche = e.target.value; $$("#recherche, #rechercheMob").forEach((o) => { if (o !== e.target) o.value = recherche; }); renderCatalogue(); }); });
+
+  // Filtre allergènes : bouton dans la barre de recherche, volet en surimpression
+  document.addEventListener("change", (e) => { const cb = e.target.closest("[data-allerg]"); if (!cb) return; const k = cb.dataset.allerg; if (cb.checked) sans.add(k); else sans.delete(k); renderAllerg(); renderCatalogue(); observeSections(); $$("[data-filter-pop]").forEach((p0) => { if (p0.closest(".search-wrap") === cb.closest(".search-wrap")) p0.hidden = false; }); });
+  $$("[data-filter-toggle]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); const pop = b.closest(".search-wrap").querySelector("[data-filter-pop]"); const open = pop.hidden; $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); pop.hidden = !open; }));
+  document.addEventListener("click", (e) => { if (!e.target.closest(".search-wrap")) $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); });
 
   // Mobile : la barre haute n'apparaît que lorsque le bloc logo est sorti de l'écran
   const heroIo = new IntersectionObserver((entries) => { document.body.classList.toggle("hdr", !entries[0].isIntersecting); }, { rootMargin: "-40px 0px 0px 0px", threshold: 0 });

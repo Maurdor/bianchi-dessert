@@ -462,3 +462,22 @@ html[dir="rtl"] .line-sub, html[dir="rtl"] .supp-add { padding-left: 0; padding-
 .achip.on { border-color: var(--bad); background: var(--bad-bg); color: var(--bad); text-decoration: line-through; }
 .allerg small { flex-basis: 100%; font-size: 11px; color: var(--faint); }
 @media (min-width: 1024px) { .allerg.desk { padding: 0 0 16px; } }
+
+/* Filtre allergènes dans la barre de recherche */
+.search-wrap { position: relative; }
+.search-wrap .search { padding-inline-end: 8px; }
+.filter-btn { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.filter-btn.on { border-color: var(--gold-deep); color: var(--gold-deep); background: var(--gold-tint); }
+.filter-btn .fcount { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; border-radius: 999px; background: var(--bad); color: #fff; font-size: 10px; font-weight: 800; display: grid; place-items: center; padding: 0 4px; }
+.filter-pop { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 40; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow-lift); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+.filter-pop[hidden] { display: none; }
+.fp-head { display: flex; align-items: center; justify-content: space-between; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-deep); font-weight: 800; padding-bottom: 4px; }
+.fp-head .linkish { padding: 0; font-size: 12px; }
+.fp-opt { display: flex; align-items: center; gap: 10px; padding: 8px 4px; font-size: 14px; cursor: pointer; border-top: 1px solid var(--line-soft); }
+.fp-opt input { width: 18px; height: 18px; accent-color: var(--gold-deep); }
+.fp-opt:has(input:checked) span { color: var(--bad); text-decoration: line-through; }
+.filter-pop small { font-size: 11px; color: var(--faint); padding-top: 4px; }
+.allerg, .allerg.desk { display: none !important; }
+@media (min-width: 1024px) { .topbar-search { display: block; flex: 1; max-width: 420px; margin: 0 0 0 16px; } .topbar-search .search { padding: 6px 8px 6px 14px; } }
+.search-reveal.open { overflow: visible; }
+.search-reveal .filter-pop { z-index: 60; }
