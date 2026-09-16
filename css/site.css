@@ -541,3 +541,10 @@ html[data-theme="dark"] .filter-btn .fcount { color: #2a1516; }
   .steps { flex-direction: row; gap: 20px; }
   .steps li { flex: 1; align-items: flex-start; line-height: 1.4; }
 }
+
+/* Signature */
+.credit { margin-top: 28px; padding: 14px 0 0; border-top: 1px solid var(--line-soft); text-align: center; font-size: 12px; color: var(--faint); letter-spacing: .02em; }
+.credit em { font-style: italic; color: var(--gold-deep); }
+.credit a { color: var(--muted); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--gold); padding-bottom: 1px; }
+.credit a:hover { color: var(--gold-deep); }
+@media (min-width: 1024px) { .credit { text-align: end; } }
