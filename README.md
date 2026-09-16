@@ -1,5 +1,7 @@
 # Bianchi Dessert — site de commande
 
+> **Production (16/09/2026)** : https://bianchidessert.com, hébergé sur Cloudflare (compte du propriétaire du projet), base Supabase `bianchi-dessert` (réf. `qdijutedcmhjenjyvdcv`, région Paris). Redéployer après une modification : `npx wrangler deploy` depuis ce dossier (connexion Cloudflare déjà faite sur ce Mac avec `npx wrangler login`). Les commandes Supabase passent par `npx supabase db query --linked "..."`. Le mot de passe de la base est conservé hors du dépôt dans `../bianchi-dessert-supabase-db.txt`.
+
 Site de commande en ligne pour Bianchi Dessert : catalogue avec **stock du jour en temps réel**, panier, commande envoyée sur **WhatsApp**, et un **espace pâtissier** pour gérer stocks, prix, photos, promotions, bannières et commandes.
 
 Tout est gratuit : hébergement **Netlify** (plan Free) + base de données **Supabase** (plan Free).
