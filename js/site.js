@@ -646,7 +646,7 @@
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (b) { L.set(b.dataset.lang); applyStatic(); renderAll(); } });
 
   const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"); if (a) $("#catnav").scrollTo({ left: a.offsetLeft - 20, behavior: "smooth" }); } });
+    entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"), nav = $("#catnav"); if (a && nav && (a.offsetLeft < nav.scrollLeft || a.offsetLeft + a.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollTo({ left: Math.max(0, a.offsetLeft - 20), behavior: "smooth" }); } });
   }, { rootMargin: "-90px 0px -70% 0px" });
   const observeSections = () => $$(".section").forEach((s) => io.observe(s));
 

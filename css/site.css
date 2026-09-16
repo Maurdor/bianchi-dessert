@@ -429,10 +429,6 @@ html[dir="rtl"] .line-sub, html[dir="rtl"] .supp-add { padding-left: 0; padding-
 /* Filtre allergènes dans la barre de recherche */
 .search-wrap { position: relative; }
 .search-wrap .search { padding-inline-end: 8px; }
-.filter-btn { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--muted); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-.filter-btn.on { border-color: var(--gold-deep); color: var(--gold-deep); background: var(--gold-tint); }
-.filter-btn .fcount { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; border-radius: 999px; background: var(--bad); color: #fff; font-size: 10px; font-weight: 800; display: grid; place-items: center; padding: 0 4px; }
-.filter-pop { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 40; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow-lift); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .filter-pop[hidden] { display: none; }
 .fp-head { display: flex; align-items: center; justify-content: space-between; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-deep); font-weight: 800; padding-bottom: 4px; }
 .fp-head .linkish { padding: 0; font-size: 12px; }
@@ -457,3 +453,14 @@ html { overflow-x: clip; }
 .wa-round { width: 40px; height: 40px; }
 .wa-pill, .status-pill, .cart-top { white-space: nowrap; flex: none; }
 @media (min-width: 1024px) { .topbar-right { gap: 12px; } .topbar-right .theme-btn { width: 44px; } .lang-switch select { padding-inline: 14px 30px; background-position: right 12px center; } }
+
+/* Revue v2 : numéro WhatsApp sur une ligne, marge du bouton « Sans », ordre des paragraphes d'intro */
+.foot-wa { white-space: nowrap; flex: none; }
+.search-wrap .search { padding: 0 6px 0 14px; }
+.search-wrap .filter-btn { margin-inline-end: 0; }
+.hero .intro.desk { display: none !important; }
+@media (min-width: 1024px) { .hero .intro.desk { display: block !important; } .hero .intro.mob { display: none !important; } }
+.wa-pill svg, .wa-pill span, .foot-wa svg, .foot-wa span { display: inline-block; vertical-align: middle; line-height: 1; }
+.wa-pill svg, .foot-wa svg { flex: none; margin: 0; }
+.cart-top { flex-wrap: nowrap; } .cart-top svg, .cart-top .count, .cart-top .total { flex: none; }
+@media (min-width: 1024px) { .topbar-search { width: min(440px, 30vw); } }
