@@ -55,6 +55,13 @@
       const d = loadLocal();
       return { categories: d.categories, produits: d.produits, bannieres: d.bannieres, parametres: d.parametres };
     },
+    // Meilleure vente sur 30 jours (au moins 3 pièces), hors pièce du jour et suppléments
+    async getBestSeller() {
+      const d = loadLocal(); const depuis = Date.now() - 30 * 864e5; const tot = {};
+      d.commandes.filter((c) => c.statut !== "annulee" && new Date(c.created_at).getTime() >= depuis).forEach((c) => (c.articles || []).forEach((a) => { tot[a.produit_id] = (tot[a.produit_id] || 0) + a.qte; }));
+      const best = Object.entries(tot).filter(([id, q]) => { const p = d.produits.find((x) => x.id === id); return q >= 3 && p && p.actif !== false && !p.supplement && !p.vedette; }).sort((a, b) => b[1] - a[1])[0];
+      return best ? best[0] : null;
+    },
     onChange(cb) {
       const h = (e) => { if (!e.key || e.key === LS_KEY) cb(); };
       window.addEventListener("storage", h);
@@ -180,6 +187,7 @@
         ]);
         return { categories, produits, bannieres, parametres: parametres || {} };
       },
+      async getBestSeller() { const { data, error } = await sb.rpc("best_seller"); if (error) return null; return data && data[0] ? data[0].produit_id : null; },
       onChange(cb) {
         const ch = sb.channel("catalogue")
           .on("postgres_changes", { event: "*", schema: "public", table: "produits" }, cb)

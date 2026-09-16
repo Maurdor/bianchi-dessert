@@ -25,6 +25,7 @@
   let cart = loadCart();
   let recherche = "";
   let sans = new Set();   // allergènes exclus par le client
+  let bestSellerId = null; // meilleure vente automatique (30 jours), calculée côté base
   let confirmation = null;
   let clientInfo = loadClient();
   let gps = null;
@@ -67,7 +68,17 @@
     clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 2600);
   }
 
-  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}${sansTag ? "" : `<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>`}${p.vedette || p.promo_label ? `<div class="badges">${p.vedette ? `<span class="promo">★ ${esc(t("featured"))}</span>` : ""}${p.promo_label ? `<span class="promo">${esc(promoTxt(p))}</span>` : ""}</div>` : ""}${extra}</div>`;
+  // Règle des étiquettes : « Pièce du jour » prime et s'affiche seule ; sinon l'étiquette promo du pâtissier (hors « Best-seller », qui n'est plus manuel)
+  // et « Best-seller » attribué automatiquement au produit le plus vendu sur 30 jours.
+  const labelsDe = (p) => {
+    if (p.vedette) return [`★ ${t("featured")}`];
+    const out = [];
+    if (p.promo_label && !/best[- ]?seller/i.test(p.promo_label)) out.push(promoTxt(p));
+    if (bestSellerId && p.id === bestSellerId) out.push(TR.promo_labels?.["Best-seller"]?.[L.lang] || "Best-seller");
+    return out;
+  };
+  const badgesHtml = (p) => { const ls = labelsDe(p); return ls.length ? `<div class="badges">${ls.map((l) => `<span class="promo">${esc(l)}</span>`).join("")}</div>` : ""; };
+  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}${sansTag ? "" : `<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>`}${badgesHtml(p)}${extra}</div>`;
 
   // ---------- Textes statiques ----------
   function applyStatic() {
@@ -641,6 +652,7 @@
   async function recharger() {
     try {
       data = await api.getCatalogue();
+      try { bestSellerId = api.getBestSeller ? await api.getBestSeller() : null; } catch { bestSellerId = null; }
       for (const id of Object.keys(cart)) {
         const p = produit(id);
         if (!p || p.actif === false) delete cart[id];

@@ -200,6 +200,31 @@ end;
 $$;
 grant execute on function public.passer_commande(jsonb, jsonb) to anon, authenticated;
 
+
+-- ---------- FONCTION : meilleure vente automatique ----------
+-- Produit le plus vendu sur les 30 derniers jours (commandes non annulées), au moins 3 pièces,
+-- hors pièce du jour (qui prime) et hors suppléments. Lisible par tous : le site l'appelle pour poser l'étiquette « Best-seller ».
+create or replace function public.best_seller()
+returns table (produit_id uuid, qte bigint)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select a.produit_id, sum(a.qte)::bigint as qte
+  from public.commandes c
+  cross join lateral jsonb_to_recordset(c.articles) as a(produit_id uuid, qte int)
+  join public.produits p on p.id = a.produit_id
+  where c.created_at >= now() - interval '30 days'
+    and c.statut <> 'annulee'
+    and p.actif and not p.supplement and not p.vedette
+  group by a.produit_id
+  having sum(a.qte) >= 3
+  order by qte desc, min(c.created_at) asc
+  limit 1;
+$$;
+grant execute on function public.best_seller() to anon, authenticated;
+
 -- ---------- FONCTION : le client a ouvert WhatsApp avec le récapitulatif ----------
 -- Ne fait que poser un drapeau ; permet au pâtissier de repérer les commandes réservées jamais envoyées.
 create or replace function public.marquer_envoyee(p_id uuid)
@@ -290,7 +315,7 @@ on conflict (id) do nothing;
 select setval('public.categories_id_seq', (select max(id) from public.categories));
 
 insert into public.produits (categorie_id, nom, description, prix, promo_label, stock, suivre_stock, ordre) values
-  (1, 'Charlotte aux pommes cannelle', 'Biscuits cuillère, compotée de pommes à la cannelle et crème légère.', 30, 'Best-seller', 4, true, 1),
+  (1, 'Charlotte aux pommes cannelle', 'Biscuits cuillère, compotée de pommes à la cannelle et crème légère.', 30, '', 4, true, 1),
   (2, 'Mini Beignet Pomme', 'Beignet moelleux garni de compotée de pommes.', 8, '', 3, true, 1),
   (2, 'Mini Beignet Nutella', 'Beignet moelleux, cœur Nutella généreux.', 8, '', 8, true, 2),
   (2, 'Mini Beignet Spéculoos', 'Beignet moelleux, crème de spéculoos.', 8, '', 0, true, 3),
@@ -442,3 +467,4 @@ update public.produits set allergenes = 'Lait' where nom = 'Caramel beurre salé
 update public.produits set allergenes = 'Lait' where nom = 'Caramel beurre salé maison — Grand' and coalesce(allergenes,'') = '';
 update public.produits set allergenes = 'Gluten, œufs, lait, soja' where nom = 'Cookie glacé vanille caramel — Petit' and coalesce(allergenes,'') = '';
 update public.produits set allergenes = 'Gluten, œufs, lait, soja' where nom = 'Cookie glacé vanille caramel — Grand' and coalesce(allergenes,'') = '';
+update public.produits set promo_label = '' where promo_label = 'Best-seller';
