@@ -16,7 +16,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--body); }
 h1, h2, h3 { font-weight: 600; margin: 0; }
 .serif { font-family: var(--display); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.desk { display: none !important; }
+/* Bascule bureau / mobile : on ne fait que cacher, chaque élément garde son propre display */
+@media (max-width: 1023px) { .desk { display: none !important; } }
+@media (min-width: 1024px) { .mob { display: none !important; } }
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
 .empty { color: var(--muted); font-style: italic; padding: 40px 0; text-align: center; }
 .eyebrow { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; }
@@ -211,7 +213,6 @@ details.soldout .grid { margin-top: 10px; }
 
 /* ---------- Bureau ---------- */
 @media (min-width: 1024px) {
-  .desk { display: revert !important; } .mob { display: none !important; }
   .topbar-inner { height: 72px; padding: 0 var(--gutter-desk); }
   .brand img { width: 44px; height: 44px; } .brand b { font-size: 22px; } .brand small { letter-spacing: .32em; margin-top: 4px; }
   .topbar-search { width: 440px; }
@@ -458,9 +459,24 @@ html { overflow-x: clip; }
 .foot-wa { white-space: nowrap; flex: none; }
 .search-wrap .search { padding: 0 6px 0 14px; }
 .search-wrap .filter-btn { margin-inline-end: 0; }
-.hero .intro.desk { display: none !important; }
-@media (min-width: 1024px) { .hero .intro.desk { display: block !important; } .hero .intro.mob { display: none !important; } }
 .wa-pill svg, .wa-pill span, .foot-wa svg, .foot-wa span { display: inline-block; vertical-align: middle; line-height: 1; }
 .wa-pill svg, .foot-wa svg { flex: none; margin: 0; }
 .cart-top { flex-wrap: nowrap; } .cart-top svg, .cart-top .count, .cart-top .total { flex: none; }
 @media (min-width: 1024px) { .topbar-search { width: min(440px, 30vw); } }
+
+/* Pied de page : une ligne par information, livraison sur la ligne du bas */
+.foot-delivery { display: inline-flex; align-items: center; gap: 6px; color: var(--faint); }
+.foot-delivery[hidden] { display: none; }
+@media (min-width: 1024px) {
+  .foot-brand { flex: 1; min-width: 0; }
+  .foot-info { flex: none; }
+  .foot-info > * { white-space: nowrap; }
+  .foot-bottom { gap: 12px 24px; }
+}
+/* .desk « revert » rend au navigateur ses valeurs par défaut : on fixe explicitement l'affichage des éléments flex */
+@media (min-width: 1024px) {
+  .status-pill.desk, .wa-pill.desk, .cart-top.desk { display: inline-flex !important; }
+  .cart-top.desk.hidden { display: none !important; }
+  .topbar-search.desk { display: block !important; }
+  .micro.desk { display: flex !important; }
+}
