@@ -490,43 +490,43 @@ html[data-theme="dark"] .theme-btn .ic-moon { display: none; }
 html[dir="rtl"] .hero-tools { right: auto; left: 0; }
 .hero-tools .hero-lang { position: static; }
 html[data-theme="dark"] {
-  /* Pantone 4975 C = #3F2021 : bordeaux profond chocolat */
-  --bg: #3f2021; --surface: #4d2a2c; --surface-2: #5b3436;
-  --cream: #3f2021; --paper: #4d2a2c; --ink-2: #2a1516;
-  --gold: #d4b378; --gold-deep: #e6cc92; --gold-tint: #5c3b2f; --gold-soft: #5c3b2f;
-  --line: #6e4245; --line-soft: #5d383b;
-  --text: #f6ece5; --muted: #d3bdb6; --faint: #a58f89;
-  --good: #9ad9ae; --good-bg: #2f4a39; --warn: #f2c96e; --warn-bg: #5a4020; --bad: #f4a7a7; --bad-bg: #5c2d2f;
-  --photo: #5a3338; --photo-icon: #a58f89;
-  --shadow-card: 0 1px 2px rgba(0,0,0,.25), 0 8px 24px rgba(0,0,0,.28);
-  --shadow-lift: 0 1px 2px rgba(0,0,0,.25), 0 14px 34px rgba(0,0,0,.38);
-  --shadow: 0 10px 30px rgba(0,0,0,.35); --shadow-sm: 0 2px 8px rgba(0,0,0,.3);
+  /* Bordeaux profond : fond #2A1214, cartes au Pantone 4975 C = #3F2021 */
+  --bg: #2a1214; --surface: #3f2021; --surface-2: #4a2729;
+  --cream: #2a1214; --paper: #3f2021; --ink-2: #1a0b0d;
+  --gold: #d4b378; --gold-deep: #e6cc92; --gold-tint: #4a2a22; --gold-soft: #4a2a22;
+  --line: #5a3237; --line-soft: #4a292d;
+  --text: #f6ece5; --muted: #cfb8b1; --faint: #a08a84;
+  --good: #9ad9ae; --good-bg: #2b3f32; --warn: #f2c96e; --warn-bg: #4a341a; --bad: #f4a7a7; --bad-bg: #4e2426;
+  --photo: #4a272c; --photo-icon: #a08a84;
+  --shadow-card: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  --shadow-lift: 0 1px 2px rgba(0,0,0,.3), 0 14px 34px rgba(0,0,0,.45);
+  --shadow: 0 10px 30px rgba(0,0,0,.4); --shadow-sm: 0 2px 8px rgba(0,0,0,.35);
   color-scheme: dark;
 }
 html[data-theme="dark"] body { background: var(--bg); color: var(--text); }
-html[data-theme="dark"] .tag { background: rgba(63,32,33,.9); }
+html[data-theme="dark"] .tag { background: rgba(42,18,20,.9); }
 html[data-theme="dark"] .tag-bad { color: #bfa9a3; }
-html[data-theme="dark"] .catnav { background: rgba(63,32,33,.96); }
-html[data-theme="dark"] .btn-ink, html[data-theme="dark"] .cart-fab { background: var(--gold); color: #2a1516; }
+html[data-theme="dark"] .catnav { background: rgba(42,18,20,.96); }
+html[data-theme="dark"] .btn-ink, html[data-theme="dark"] .cart-fab { background: var(--gold); color: #1a0b0d; }
 html[data-theme="dark"] .btn-ink:hover { background: #e6cc92; }
-html[data-theme="dark"] .cart-fab .count { background: #2a1516; color: var(--gold); }
-html[data-theme="dark"] .cart-fab .total { color: #2a1516; }
-html[data-theme="dark"] .closed-banner { background: #2a1516; }
+html[data-theme="dark"] .cart-fab .count { background: #1a0b0d; color: var(--gold); }
+html[data-theme="dark"] .cart-fab .total { color: #1a0b0d; }
+html[data-theme="dark"] .closed-banner { background: #1a0b0d; }
 html[data-theme="dark"] .lang-switch select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23e6cc92' stroke-width='1.6'/%3E%3C/svg%3E"); }
 html[data-theme="dark"] .lang-switch select option { color: var(--text); background: var(--surface); }
 html[data-theme="dark"] .btn-ghost { color: var(--text); }
-html[data-theme="dark"] .toast { background: var(--gold); color: #2a1516; }
-html[data-theme="dark"] .toast.err { background: var(--bad); color: #2a1516; }
+html[data-theme="dark"] .toast { background: var(--gold); color: #1a0b0d; }
+html[data-theme="dark"] .toast.err { background: var(--bad); color: #1a0b0d; }
 html[data-theme="dark"] .modal { background: rgba(0,0,0,.6); }
 html[data-theme="dark"] .overlay { background: rgba(0,0,0,.6); }
 html[data-theme="dark"] .field input:not([type=checkbox]):not([type=radio]), html[data-theme="dark"] .field select, html[data-theme="dark"] .field textarea { color: var(--text); }
 html[data-theme="dark"] .price-old { color: var(--faint); }
 html[data-theme="dark"] .banniere { background: var(--gold-tint); border-color: var(--gold); color: var(--text); }
 html[data-theme="dark"] .banniere p { color: var(--muted); }
-html[data-theme="dark"] .banniere-noir { background: #2a1516; }
+html[data-theme="dark"] .banniere-noir { background: #1a0b0d; }
 html[data-theme="dark"] .banniere-blanc { background: var(--surface); border-color: var(--line); }
 html[data-theme="dark"] .photo .ph .emoji { filter: saturate(.8) brightness(.95); }
-html[data-theme="dark"] .filter-btn .fcount { color: #2a1516; }
+html[data-theme="dark"] .filter-btn .fcount { color: #1a0b0d; }
 
 /* Pied de page : réassurance lisible, 3 étapes numérotées */
 .foot-info { display: grid; grid-template-columns: 1fr; gap: 16px; }
