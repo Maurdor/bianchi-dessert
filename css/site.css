@@ -296,7 +296,7 @@ html[dir="rtl"] .modal-close { right: auto; left: 12px; }
   .topbar-status, .topbar-wa { display: flex; }
   .layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 48px; padding-top: 40px; }
   .col-brand { align-items: flex-start; text-align: start; padding: 0; gap: 20px; position: sticky; top: 96px; align-self: start; }
-  .col-brand .logo { width: 180px; height: 180px; margin-inline-start: -8px; }
+  .col-brand .logo { width: 180px; height: 180px; margin-inline-start: 0; }
   .head-day.desk { display: flex !important; flex-direction: column; align-items: flex-start; gap: 8px; padding: 4px 0 0; }
   .head-day.desk h1 { font-size: 56px; }
   .intro.desk { display: block !important; font-size: 14.5px; }
@@ -527,3 +527,17 @@ html[data-theme="dark"] .banniere-noir { background: #2a1516; }
 html[data-theme="dark"] .banniere-blanc { background: var(--surface); border-color: var(--line); }
 html[data-theme="dark"] .photo .ph .emoji { filter: saturate(.8) brightness(.95); }
 html[data-theme="dark"] .filter-btn .fcount { color: #2a1516; }
+
+/* Pied de page : réassurance lisible, 3 étapes numérotées */
+.foot-info { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.reassure-line { margin: 0; font-size: 13px; color: var(--muted); }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; counter-reset: etape; }
+.steps li { counter-increment: etape; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); }
+.steps li::before { content: counter(etape); width: 24px; height: 24px; border-radius: 50%; background: var(--gold); color: var(--ink); font-weight: 800; font-size: 12px; display: grid; place-items: center; flex: none; }
+.foot-info .reassure { display: flex; flex-direction: column; gap: 10px; }
+@media (min-width: 1024px) {
+  .foot-info { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; gap: 24px 48px; flex-direction: unset; flex-wrap: unset; }
+  .foot-info .intro.mob { display: none; }
+  .steps { flex-direction: row; gap: 20px; }
+  .steps li { flex: 1; align-items: flex-start; line-height: 1.4; }
+}

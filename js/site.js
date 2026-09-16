@@ -646,7 +646,7 @@
   }, { rootMargin: "-90px 0px -70% 0px" });
   const observeSections = () => $$(".section").forEach((s) => io.observe(s));
 
-  function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); $("#reassure").textContent = t("footer_line") + " · " + t("steps"); }
+  function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); $("#reassure").innerHTML = `<p class="reassure-line">${esc(t("footer_line"))}</p><ol class="steps">${t("steps").split(/\s*·\s*/).map((x) => x.replace(/^\s*\d+[.)]\s*/, "")).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join("")}</ol>`; }
 
   // ---------- Chargement ----------
   async function recharger() {
