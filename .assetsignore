@@ -1,0 +1,10 @@
+.git
+.claude
+node_modules
+*.bak
+supabase
+README.md
+wrangler.jsonc
+.assetsignore
+.gitignore
+.wrangler
