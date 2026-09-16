@@ -601,6 +601,16 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") { closeModal(); closeDrawer(); } });
   ["#recherche", "#rechercheMob"].forEach((sel) => { const el = $(sel); if (el) el.addEventListener("input", (e) => { recherche = e.target.value; $$("#recherche, #rechercheMob").forEach((o) => { if (o !== e.target) o.value = recherche; }); renderCatalogue(); }); });
 
+  // Thème sombre (bordeaux chocolat) : bascule mémorisée
+  function applyTheme(th) {
+    document.documentElement.toggleAttribute("data-theme", th === "dark"); if (th === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    try { localStorage.setItem("bianchi_theme", th); } catch {}
+    $$("[data-theme-toggle]").forEach((b) => b.setAttribute("aria-label", th === "dark" ? t("theme_light") : t("theme_dark")));
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = th === "dark" ? "#2b141a" : "#f8f3ea";
+  }
+  $$("[data-theme-toggle]").forEach((b) => b.addEventListener("click", () => applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark")));
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light");
+
   // Filtre allergènes : bouton dans la barre de recherche, volet en surimpression
   document.addEventListener("change", (e) => { const cb = e.target.closest("[data-allerg]"); if (!cb) return; const k = cb.dataset.allerg; if (cb.checked) sans.add(k); else sans.delete(k); renderAllerg(); renderCatalogue(); observeSections(); $$("[data-filter-pop]").forEach((p0) => { if (p0.closest(".search-wrap") === cb.closest(".search-wrap")) p0.hidden = false; }); });
   $$("[data-filter-toggle]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); const pop = b.closest(".search-wrap").querySelector("[data-filter-pop]"); const open = pop.hidden; $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); pop.hidden = !open; }));
