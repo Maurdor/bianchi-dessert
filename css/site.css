@@ -565,3 +565,16 @@ html[data-theme="dark"] .tag { background: rgba(42,18,20,.8); backdrop-filter: b
 @media (min-width: 1024px) { .grid { align-items: start; } .grid:has(> .card:only-child) .card.has-tabs { padding-top: 18px; } }
 .featured.has-tabs { overflow: visible; }
 .featured.has-tabs .photo { border-radius: 6px; overflow: hidden; }
+
+/* Pied de page empilé : réassurance et étapes, puis infos pratiques ; pictos 18 px */
+@media (min-width: 1024px) {
+  .foot-info { grid-template-columns: 1fr; gap: 20px; }
+  .foot-info ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 32px; }
+}
+.foot-info li svg, .infos-list li svg { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+.foot-info li, .infos-list li { align-items: flex-start; }
+/* Corbeille dans le panier */
+.line-name .remove { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-height: 0; padding: 0; margin-top: 2px; border-radius: 50%; color: var(--muted); background: transparent; }
+.line-name .remove:hover { color: var(--bad); background: var(--bad-bg); }
+.line-sub .remove { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; }
+.line-sub .remove svg { width: 14px; height: 14px; }

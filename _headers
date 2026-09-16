@@ -6,3 +6,11 @@
 
 /admin.html
   X-Robots-Tag: noindex
+
+# Photos, logo, styles et scripts : versionnés (nom de fichier ou ?v=), cache d'un an
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+/js/*
+  Cache-Control: public, max-age=31536000, immutable

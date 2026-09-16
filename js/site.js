@@ -18,6 +18,7 @@
     bike: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M6 17h6l3-7h3M9 10h4l3 7"/></svg>`,
     bag: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>`,
     photo: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>`,
+    trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`,
     wa: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-13.2 8L3 21l1.1-4.6A9 9 0 1 1 21 12Z"/></svg>`,
   };
 
@@ -191,7 +192,7 @@
       <div class="card-body">
         <div class="card-title" data-open="${p.id}">${esc(nomP(p))}</div>
         ${c(p, "description") ? `<p class="card-desc">${esc(c(p, "description"))}</p>` : ""}
-        <div class="card-foot">${priceHtml(p.prix, p.ancien_prix)}${actionHtml(p)}</div>
+        <div class="card-foot">${priceHtml(p.prix, p.ancien_prix)}<span class="act">${actionHtml(p)}</span></div>
       </div>
     </article>`;
   }
@@ -205,7 +206,7 @@
       <div class="featured-body">
         <div class="row"><h3 data-open="${p.id}">${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
-        <div class="foot"><span class="stock-inline ${stockKind(p)}">${esc(st)}</span>${action}</div>
+        <div class="foot"><span class="stock-inline ${stockKind(p)}">${esc(st)}</span><span class="act">${action}</span></div>
       </div>
     </article>`;
   }
@@ -216,6 +217,13 @@
     </div>`;
   }
 
+  // Rafraîchit seulement la zone d'action (bouton + / quantité) des cartes d'un produit, sans toucher aux photos
+  function refreshCardActions(id) {
+    const p = produit(id); if (!p) return;
+    $$(`.card[data-id="${id}"] .act`).forEach((el) => { el.innerHTML = actionHtml(p); });
+    $$(`.featured[data-id="${id}"] .act`).forEach((el) => { const q = cart[p.id] || 0; el.innerHTML = q > 0 ? actionHtml(p) : `<button class="btn btn-ink btn-sm" data-plus="${p.id}">${esc(t("add"))}</button>`; });
+  }
+
   // ---------- Panier ----------
   function addToCart(id, n = 1) {
     const p = produit(id);
@@ -223,12 +231,12 @@
     const cur = cart[id] || 0, max = stockMax(p);
     if (cur + n > max) { toast(t("toast_max", { n: max, name: nomP(p) }), true); cart[id] = max; }
     else { cart[id] = cur + n; toast(t("toast_added", { name: nomP(p) })); }
-    saveCart(); refreshCartUI(); renderCatalogue();
+    saveCart(); refreshCartUI(); refreshCardActions(id);
   }
   function removeFromCart(id, n = 1) {
     if (!cart[id]) return;
     cart[id] -= n; if (cart[id] <= 0) delete cart[id];
-    saveCart(); refreshCartUI(); renderCatalogue();
+    saveCart(); refreshCartUI(); refreshCardActions(id);
   }
   const cartLines = () => Object.entries(cart).map(([id, qte]) => ({ p: produit(id), qte })).filter((l) => l.p);
   const sousTotal = () => cartLines().reduce((s, l) => s + l.p.prix * l.qte, 0);
@@ -354,12 +362,12 @@
     body.innerHTML = `
       <div>${lines.filter((l) => !isSupp(l.p)).map((l) => `
         <div class="line">
-          <div class="line-name"><b>${esc(nomP(l.p))}</b><small class="num">${esc(t("unit_price", { price: money(l.p.prix) }))}${l.p.suivre_stock ? ` · ${esc(l.p.stock - l.qte <= 1 ? t("suggest_last") : t("in_stock", { n: l.p.stock }))}` : ""}</small><button class="remove" data-remove="${l.p.id}">${esc(t("remove"))}</button></div>
+          <div class="line-name"><b>${esc(nomP(l.p))}</b><small class="num">${esc(t("unit_price", { price: money(l.p.prix) }))}${l.p.suivre_stock ? ` · ${esc(l.p.stock - l.qte <= 1 ? t("suggest_last") : t("in_stock", { n: l.p.stock }))}` : ""}</small><button class="remove" data-remove="${l.p.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button></div>
           <span class="stepper"><button data-moins="${l.p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${l.qte}</span><button data-plus="${l.p.id}" aria-label="${esc(t("more"))}">+</button>${l.p.prix <= 10 && l.qte < 4 && stockMax(l.p) >= 4 ? `<button class="x4" data-qty4="${l.p.id}">${esc(t("qty4"))}</button>` : ""}</span>
           <span class="line-price num">${esc(money(l.p.prix * l.qte))}</span>
         </div>
         ${suppFor(l.p).map((sp) => cart[sp.id]
-          ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}">×</button></div>`
+          ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button></div>`
           : `<button class="supp-add" data-supp="${sp.id}" data-parent="${l.p.id}">${esc(t("supp_add", { name: nomP(sp), price: money(sp.prix) }))}</button>`).join("")}`).join("")}</div>
       ${mode === "livraison" && p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 && !livraisonOfferte() ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>` : ""}</div>` : ""}
       ${suggestionsHtml(lines, mode)}
@@ -599,7 +607,7 @@
     else if (el.dataset.remove) removeFromCart(el.dataset.remove, 999);
     else if (el.dataset.supp) { const sp = produit(el.dataset.supp), par = produit(el.dataset.parent); if (sp && par && cart[par.id]) { cart[sp.id] = cart[par.id]; saveCart(); toast(t("toast_added", { name: nomP(sp) })); refreshCartUI(); } }
     else if (el.hasAttribute("data-allerg-clear")) { sans.clear(); renderAllerg(); renderCatalogue(); observeSections(); }
-    else if (el.dataset.qty4) { const p = produit(el.dataset.qty4); if (p) { cart[p.id] = Math.min(4, stockMax(p)); saveCart(); refreshCartUI(); renderCatalogue(); } }
+    else if (el.dataset.qty4) { const p = produit(el.dataset.qty4); if (p) { cart[p.id] = Math.min(4, stockMax(p)); saveCart(); refreshCartUI(); refreshCardActions(p.id); } }
     else if (el.dataset.open) openModal(el.dataset.open);
     else if (el.dataset.target) {
       e.preventDefault();
