@@ -346,31 +346,31 @@ update public.produits set vedette = true where nom = 'Charlotte aux pommes cann
 
 
 -- ---------- PHOTOS extraites des reels Instagram (à remplacer par les photos du pâtissier) ----------
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-praline-pistache.jpg' where nom = 'Cookie Praliné Pistache';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-3-chocolats.jpg' where nom = 'Cookie 3 Chocolats';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-praline-noisette.jpg' where nom = 'Cookie Praliné Noisette';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/tiramisu-pistache.jpg' where nom = 'Tiramisu Pistache';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/tiramisu-cafe.jpg' where nom = 'Tiramisu Café';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/mini-beignet-pomme.jpg' where nom = 'Mini Beignet Pomme';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/mini-beignet-nutella.jpg' where nom = 'Mini Beignet Nutella';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/gros-beignet-nutella.jpg' where nom = 'Gros Beignet Nutella';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/palet-breton.jpg' where nom = 'Palet Breton';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/glace-vanille-petit.jpg' where nom = 'Glace Vanille Bourbon — Petit';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/glace-vanille-grand.jpg' where nom = 'Glace Vanille Bourbon — Grand';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/supplement-caramel.jpg' where nom = 'Caramel beurre salé maison — Petit';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/supplement-caramel.jpg' where nom = 'Caramel beurre salé maison — Grand';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-glace-petit.jpg' where nom = 'Cookie glacé vanille caramel — Petit';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/cookie-glace-grand.jpg' where nom = 'Cookie glacé vanille caramel — Grand';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/cookie-praline-pistache.jpg' where nom = 'Cookie Praliné Pistache';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/cookie-3-chocolats.jpg' where nom = 'Cookie 3 Chocolats';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/cookie-praline-noisette.jpg' where nom = 'Cookie Praliné Noisette';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/tiramisu-pistache.jpg' where nom = 'Tiramisu Pistache';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/tiramisu-cafe.jpg' where nom = 'Tiramisu Café';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/mini-beignet-pomme.jpg' where nom = 'Mini Beignet Pomme';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/mini-beignet-nutella.jpg' where nom = 'Mini Beignet Nutella';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/gros-beignet-nutella.jpg' where nom = 'Gros Beignet Nutella';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/palet-breton.jpg' where nom = 'Palet Breton';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/glace-vanille-petit.jpg' where nom = 'Glace Vanille Bourbon — Petit';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/glace-vanille-grand.jpg' where nom = 'Glace Vanille Bourbon — Grand';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/supplement-caramel.jpg' where nom = 'Caramel beurre salé maison — Petit';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/supplement-caramel.jpg' where nom = 'Caramel beurre salé maison — Grand';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/cookie-glace-petit.jpg' where nom = 'Cookie glacé vanille caramel — Petit';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/cookie-glace-grand.jpg' where nom = 'Cookie glacé vanille caramel — Grand';
 update public.produits set stock = 6, promo_label = 'Nouveau' where nom = 'Tiramisu Pistache';
 update public.produits set vedette = true where nom = 'Charlotte aux pommes cannelle';
 
 -- ---------- TRADUCTIONS du catalogue de départ (ar · en · de · nl) ----------
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/charlotte-pommes.jpg' where nom = 'Charlotte aux pommes cannelle';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/charlotte-pommes.jpg' where nom = 'Charlotte aux pommes cannelle';
 update public.produits set supplement = true where nom like 'Caramel beurre salé maison%';
 
 -- ---------- TRADUCTIONS du catalogue de départ (ar · en · de · nl) ----------
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/jus-orange.jpg' where nom = 'Jus d''orange pressé maison';
-update public.produits set image_url = 'https://maurdor.github.io/bianchi-dessert/assets/produits/mojito-menthe.jpg' where nom = 'Mojito menthe glacé';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/jus-orange.jpg' where nom = 'Jus d''orange pressé maison';
+update public.produits set image_url = 'https://bianchidessert.com/assets/produits/mojito-menthe.jpg' where nom = 'Mojito menthe glacé';
 
 -- ---------- TRADUCTIONS du catalogue de départ (ar · en · de · nl) ----------
 update public.categories set traductions = '{"ar":{"nom":"شارلوت","sous_titre":"القطعة المميزة، للمشاركة"},"en":{"nom":"Charlottes","sous_titre":"The signature piece, to share"},"de":{"nom":"Charlottes","sous_titre":"Das Signature-Stück, zum Teilen"},"nl":{"nom":"Charlottes","sous_titre":"Het paradepaardje, om te delen"}}'::jsonb where nom = 'Charlottes';
