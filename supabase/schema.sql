@@ -59,7 +59,9 @@ create table if not exists public.parametres (
   commandes_ouvertes boolean default true,
   message_ferme      text default '',
   livraison_active   boolean default true,
-  frais_livraison    numeric(10,2) default 0,
+  frais_livraison    numeric(10,2) default 0,      -- (ancien) frais fixes, non utilisés
+  livraison_min      numeric(10,2) default 10,     -- fourchette affichée : la livraison est facturée à la réception selon la distance
+  livraison_max      numeric(10,2) default 25,
   commande_min       numeric(10,2) default 0,
   livraison_offerte_des numeric(10,2) default 0,   -- 0 = jamais offerte
   annonce            text default '',
@@ -171,11 +173,7 @@ begin
   if coalesce(v_param.commande_min, 0) > 0 and v_total < v_param.commande_min then
     raise exception 'MINIMUM|%', v_param.commande_min;
   end if;
-  -- Frais de livraison, offerts au-delà du seuil
-  if v_mode = 'livraison' and v_param.livraison_active
-     and not (coalesce(v_param.livraison_offerte_des, 0) > 0 and v_total >= v_param.livraison_offerte_des) then
-    v_total := v_total + coalesce(v_param.frais_livraison, 0);
-  end if;
+  -- La livraison est facturée à la réception selon la distance : le total ne l'inclut pas.
 
   select count(*) + 1 into v_rang from public.commandes
     where (created_at at time zone 'Africa/Casablanca')::date = v_jour;
@@ -341,6 +339,8 @@ alter table public.commandes  add column if not exists creneau text default 'asa
 alter table public.commandes  add column if not exists code text;
 alter table public.commandes  add column if not exists whatsapp_envoye boolean default false;
 alter table public.parametres add column if not exists livraison_offerte_des numeric(10,2) default 0;
+alter table public.parametres add column if not exists livraison_min numeric(10,2) default 10;
+alter table public.parametres add column if not exists livraison_max numeric(10,2) default 25;
 
 update public.produits set vedette = true where nom = 'Charlotte aux pommes cannelle';
 
@@ -412,3 +412,33 @@ update public.produits set traductions = '{"ar":{"nom":"عصير برتقال ط
 update public.produits set traductions = '{"ar":{"nom":"موهيتو بالنعناع المثلج","description":"نعناع طازج، ليمون معصور، ثلج مجروش. بدون كحول."},"en":{"nom":"Iced mint mojito","description":"Fresh mint, squeezed lemon, crushed ice. Alcohol-free."},"de":{"nom":"Eisgekühlter Minz-Mojito","description":"Frische Minze, gepresste Zitrone, Crushed Ice. Alkoholfrei."},"nl":{"nom":"IJskoude munt-mojito","description":"Verse munt, geperste citroen, gemalen ijs. Alcoholvrij."}}'::jsonb where nom = 'Mojito menthe glacé';
 update public.bannieres set traductions = '{"ar":{"titre":"عرض الكوكيز: اشترِ 3 والرابع مجاناً","texte":"تُضاف تلقائياً إلى طلبك بدءاً من 3 كوكيز."},"en":{"titre":"Cookie offer: buy 3, get the 4th free","texte":"Added automatically to your order from 3 cookies."},"de":{"titre":"Cookie-Angebot: 3 kaufen, das 4. gratis","texte":"Ab 3 Cookies automatisch zu Ihrer Bestellung hinzugefügt."},"nl":{"titre":"Koekjesactie: koop 3, de 4e gratis","texte":"Automatisch toegevoegd aan uw bestelling vanaf 3 koekjes."}}'::jsonb where titre = 'Offre cookies : 3 achetés, le 4ᵉ offert';
 update public.parametres set traductions = '{"ar":{"horaires":"الثلاثاء – الأحد · 9:00 – 20:00","delai_texte":"استلام أو توصيل في نفس اليوم حسب المخزون","annonce":"توصيل 10 د.م. في تطوان، مجاني من 60 د.م. · الدفع عند الاستلام · مخزون اليوم مباشر","message_ferme":"تستأنف الطلبات صباح الغد. إلى اللقاء قريباً!"},"en":{"horaires":"Tuesday – Sunday · 9am – 8pm","delai_texte":"Same-day pick-up or delivery, depending on stock","annonce":"Delivery 10 DH in Tétouan, free from 60 DH · Pay on delivery · Today''s stock, live","message_ferme":"Orders resume tomorrow morning. See you soon!"},"de":{"horaires":"Dienstag – Sonntag · 9 – 20 Uhr","delai_texte":"Abholung oder Lieferung am selben Tag, je nach Bestand","annonce":"Lieferung 10 DH in Tétouan, kostenlos ab 60 DH · Zahlung bei Übergabe · Tagesbestand live","message_ferme":"Bestellungen sind ab morgen früh wieder möglich. Bis bald!"},"nl":{"horaires":"Dinsdag – zondag · 9 – 20 u","delai_texte":"Afhalen of bezorging op dezelfde dag, afhankelijk van de voorraad","annonce":"Bezorging 10 DH in Tétouan, gratis vanaf 60 DH · Betaling bij ontvangst · Voorraad van vandaag, live","message_ferme":"Bestellen kan morgenochtend weer. Tot snel!"}}'::jsonb where id = 1;
+
+-- ---------- ALLERGÈNES indicatifs (à vérifier et compléter par le pâtissier) ----------
+update public.produits set allergenes = 'Gluten, œufs, lait' where nom = 'Charlotte aux pommes cannelle' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait' where nom = 'Mini Beignet Pomme' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (noisette), soja' where nom = 'Mini Beignet Nutella' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, soja' where nom = 'Mini Beignet Spéculoos' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (noisette)' where nom = 'Mini Beignet Bueno' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (pistache)' where nom = 'Mini Beignet Pistache' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait' where nom = 'Mini Beignet Framboise' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (noisette), soja' where nom = 'Gros Beignet Nutella' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (amande)' where nom = 'Palet Breton' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, soja' where nom = 'Cookie 3 Chocolats' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (noisette)' where nom = 'Cookie Praliné Noisette' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (noisette)' where nom = 'Cookie Kinder' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, fruits à coque (pistache)' where nom = 'Cookie Praliné Pistache' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Œufs, lait, gluten, fruits à coque (noisette), soja' where nom = 'Tiramisu Nutella' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Œufs, lait, gluten' where nom = 'Tiramisu Café' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Œufs, lait, gluten' where nom = 'Tiramisu Mangue / Citron' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Œufs, lait, gluten, fruits à coque (pistache)' where nom = 'Tiramisu Pistache' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Œufs, lait, soja' where nom = 'Mousse au chocolat' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, lait, œufs, soja' where nom = 'Cheesecake Lotus' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, lait, œufs, fruits à coque (noisette), soja' where nom = 'Cheesecake Nutella' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, lait, œufs, soja' where nom = 'Cheesecake Oreo' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, lait, œufs, fruits à coque (noisette)' where nom = 'Cheesecake Bueno' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Lait, œufs' where nom = 'Glace Vanille Bourbon — Petit' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Lait, œufs' where nom = 'Glace Vanille Bourbon — Grand' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Lait' where nom = 'Caramel beurre salé maison — Petit' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Lait' where nom = 'Caramel beurre salé maison — Grand' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, soja' where nom = 'Cookie glacé vanille caramel — Petit' and coalesce(allergenes,'') = '';
+update public.produits set allergenes = 'Gluten, œufs, lait, soja' where nom = 'Cookie glacé vanille caramel — Grand' and coalesce(allergenes,'') = '';

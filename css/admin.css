@@ -152,3 +152,9 @@ body { background: var(--cream); }
 
 .order-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .order.hl { outline: 2px solid var(--gold); }
+
+/* Réordonnancement */
+.item .drag { cursor: grab; color: #b9ad9a; font-size: 16px; letter-spacing: -2px; padding: 0 4px; user-select: none; }
+.item.dragging { opacity: .5; }
+.item .updown { display: inline-flex; gap: 2px; }
+.item .updown .icon-btn { width: 28px; height: 28px; font-size: 11px; }

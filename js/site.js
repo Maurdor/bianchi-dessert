@@ -24,6 +24,7 @@
   let data = { categories: [], produits: [], bannieres: [], parametres: {} };
   let cart = loadCart();
   let recherche = "";
+  let sans = new Set();   // allergènes exclus par le client
   let confirmation = null;
   let clientInfo = loadClient();
   let gps = null;
@@ -102,7 +103,7 @@
     const infos = [
       p.adresse ? `<li>${ICON.pin}<a href="${esc(maps)}" target="_blank" rel="noopener">${esc(c(p, "adresse"))} · ${esc(t("directions"))}</a></li>` : "",
       c(p, "horaires") ? `<li>${ICON.clock}<span>${esc(c(p, "horaires"))}</span></li>` : "",
-      p.livraison_active ? `<li>${ICON.bike}<span>${esc(t("delivery"))} ${Number(p.frais_livraison) ? esc(money(p.frais_livraison)) : ""}${c(p, "delai_texte") ? " · " + esc(c(p, "delai_texte")) : ""}</span></li>` : "",
+      p.livraison_active ? `<li>${ICON.bike}<span>${esc(t("delivery_info", { min: nb(p.livraison_min ?? 10), max: money(p.livraison_max ?? 25) }))}${seuilOffert() ? " · " + esc(t("free_delivery")) + " ≥ " + esc(money(seuilOffert())) : ""}${c(p, "delai_texte") ? " · " + esc(c(p, "delai_texte")) : ""}</span></li>` : "",
     ].join("");
     $("#infosDesk").innerHTML = infos;
     $("#footInfo").innerHTML = infos + `<li class="slogan">${esc(p.slogan || "")}</li><li><a href="admin.html">${esc(t("admin_link"))}</a></li>`;
@@ -114,11 +115,22 @@
     $("#bannieres").innerHTML = bh;
   }
 
+  // ---------- Filtre allergènes ----------
+  const allergTokens = (p) => String(c(p, "allergenes") || p.allergenes || "").split(/[,;·]/).map((x) => x.trim()).filter(Boolean);
+  const normA = (x) => x.toLowerCase().replace(/\s*\(.*?\)\s*/g, "").trim();
+  function renderAllerg() {
+    const map = new Map();
+    (data.produits || []).filter((p) => p.actif !== false).forEach((p) => allergTokens(p).forEach((tk) => { const k = normA(tk); if (k && !map.has(k)) { const lbl = tk.replace(/\s*\(.*?\)\s*/g, "").trim(); map.set(k, lbl.charAt(0).toUpperCase() + lbl.slice(1)); } }));
+    const html = map.size ? `<span class="lbl">${esc(t("without"))}</span>${[...map.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, label]) => `<button class="achip${sans.has(k) ? " on" : ""}" data-allerg="${esc(k)}">${esc(label)}</button>`).join("")}<small>${esc(t("allergen_note"))}</small>` : "";
+    $$("#allergDesk, #allergMob").forEach((el) => { el.innerHTML = html; el.hidden = !html; });
+  }
+  const exclu = (p) => sans.size > 0 && allergTokens(p).some((tk) => sans.has(normA(tk)));
+
   // ---------- Catalogue ----------
   function renderCatalogue() {
     const q = recherche.trim().toLowerCase();
     const cats = (data.categories || []).filter((x) => x.actif !== false).sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
-    const visibles = (data.produits || []).filter((p) => p.actif !== false && !isSupp(p))
+    const visibles = (data.produits || []).filter((p) => p.actif !== false && !isSupp(p) && !exclu(p))
       .filter((p) => !q || (nomP(p) + " " + c(p, "description") + " " + p.nom + " " + (p.description || "")).toLowerCase().includes(q))
       .sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
 
@@ -207,11 +219,11 @@
   const cartLines = () => Object.entries(cart).map(([id, qte]) => ({ p: produit(id), qte })).filter((l) => l.p);
   const sousTotal = () => cartLines().reduce((s, l) => s + l.p.prix * l.qte, 0);
   const seuilOffert = () => Number(data.parametres.livraison_offerte_des || 0);
-  const fraisLivraison = (mode) => {
-    if (mode !== "livraison" || !data.parametres.livraison_active) return 0;
-    if (seuilOffert() > 0 && sousTotal() >= seuilOffert()) return 0;
-    return Number(data.parametres.frais_livraison || 0);
-  };
+  // La livraison est facturée à la réception selon la distance : jamais ajoutée au total du site
+  const fraisLivraison = () => 0;
+  const livraisonOfferte = () => seuilOffert() > 0 && sousTotal() >= seuilOffert();
+  const nb = (n) => Number(n || 0).toLocaleString(L.locale(), { maximumFractionDigits: 2 });
+  const livraisonTexte = () => livraisonOfferte() ? t("free_delivery") : t("delivery_range", { min: nb(data.parametres.livraison_min ?? 10), max: money(data.parametres.livraison_max ?? 25) });
   // Suggestions « Complétez votre commande » : complément de format, pièce du jour, autres catégories à petit prix, rareté
   function suggestionsHtml(lines, mode) {
     lines = lines.filter((l) => !isSupp(l.p));
@@ -233,7 +245,7 @@
     // 5. Dernières pièces
     pool.filter((p) => stockKind(p) === "warn" && p.prix >= 15).forEach((p) => push(p, t("why_last")));
     if (!picks.length) return "";
-    return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map(({ p, why }) => `<div class="suggest-item"><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${why === t("why_last") ? "warn" : ""}">${esc(why)}${p.suivre_stock && (p.stock || 0) <= 3 ? " · " + esc(stockTxt(p)) : ""}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
+    return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map(({ p, why }) => `<div class="suggest-item"><div class="photo sm" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}</div><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${why === t("why_last") ? "warn" : ""}">${esc(why)}${p.suivre_stock && (p.stock || 0) <= 3 ? " · " + esc(stockTxt(p)) : ""}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
   }
 
   function syncSupplements() {
@@ -335,6 +347,7 @@
         ${suppFor(l.p).map((sp) => cart[sp.id]
           ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}">×</button></div>`
           : `<button class="supp-add" data-supp="${sp.id}" data-parent="${l.p.id}">${esc(t("supp_add", { name: nomP(sp), price: money(sp.prix) }))}</button>`).join("")}`).join("")}</div>
+      ${mode === "livraison" && p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 && !livraisonOfferte() ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>` : ""}</div>` : ""}
       ${suggestionsHtml(lines, mode)}
 
       <form class="form" id="formCommande" novalidate>
@@ -363,21 +376,16 @@
         ${c(p, "delai_texte") ? `<div class="note">${ICON.clock}<span>${esc(c(p, "delai_texte"))}</span></div>` : ""}
       </form>`;
 
-    const fl = fraisLivraison(mode), total = sousTotal() + fl;
+    const total = sousTotal();
     const min = Number(p.commande_min || 0), sousMin = min > 0 && sousTotal() < min;
-    const seuil = seuilOffert(), reste = seuil - sousTotal();
-    const livraisonLigne = mode === "livraison" && p.livraison_active ? `<div><span>${esc(t("delivery"))}</span><span class="num">${fl ? esc(money(fl)) : esc(t("free_delivery"))}</span></div>` : "";
-    const progress = mode === "livraison" && seuil > 0 && reste > 0 ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuil * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(reste) }))}</small></div>` : "";
     foot.innerHTML = `
-      ${progress}
-      <div class="totals">
-        ${livraisonLigne ? `<div><span>${esc(t("subtotal"))}</span><span class="num">${esc(money(sousTotal()))}</span></div>${livraisonLigne}` : ""}
-        <div class="grand"><span>${esc(t("total"))}</span><span class="num">${esc(money(total))}</span></div>
-      </div>
       ${!ouvert() ? `<div class="note bad">🌙 <span><b>${esc(t("closed_now"))}</b> ${esc(c(p, "message_ferme"))}</span></div>` : ""}
       ${sousMin ? `<div class="note">ℹ️ <span>${esc(t("min_order", { amount: money(min) }))}</span></div>` : ""}
-      <button class="btn btn-ink btn-block" id="envoyer"${!ouvert() || sousMin ? " disabled" : ""}>${esc(t("reserve_cart"))}</button>
-      <div class="hint">${esc(t("step1_hint"))}<br>${esc(t("footer_line"))}</div>`;
+      <div class="foot-row">
+        <div class="tot"><span class="lbl">${esc(t("total_items"))}${mode === "livraison" && p.livraison_active ? ` <small>${esc(t("excl_delivery"))}</small>` : ""}</span><span class="num">${esc(money(total))}</span></div>
+        <button class="btn btn-ink" id="envoyer"${!ouvert() || sousMin ? " disabled" : ""}>${esc(t("reserve_cart"))}</button>
+      </div>
+      <div class="hint">${esc(t("step1_hint"))}</div>`;
 
     $("#formCommande").addEventListener("change", (e) => {
       if (e.target.name === "mode") {
@@ -470,7 +478,6 @@
   function messageWhatsApp(cf) {
     const fmt = (n) => `${Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} DH`;
     const ref = cf.code || cf.numero;
-    const fl = fraisLivraison(cf.mode);
     const dateFr = cf.date ? new Date(cf.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "aujourd'hui";
     const langue = L.LANGS[L.lang] ? L.LANGS[L.lang].nom : L.lang;
     const ligneMode = cf.mode !== "livraison" ? `À emporter - retrait en boutique` : cf.client.gps_lat ? `Livraison - position GPS : ${mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng })}` : `Livraison`;
@@ -482,8 +489,8 @@
       `Client : ${cf.client.client_nom} - ${cf.client.client_tel}${L.lang !== "fr" ? ` (langue : ${langue})` : ""}`,
       ``,
       cf.articles.map((l) => `${produit(l.produit_id)?.supplement ? "   + " : ""}${l.qte} x ${l.nom} - ${fmt(l.prix * l.qte)}`).join("\n"),
-      cf.mode === "livraison" ? (fl ? `Livraison - ${fmt(fl)}` : `Livraison offerte`) : null,
-      `*Total : ${fmt(cf.total)}, à régler à la réception*`,
+      cf.mode === "livraison" ? ((seuilOffert() > 0 && cf.total >= seuilOffert()) ? `Livraison offerte` : `Livraison : ${Number(data.parametres.livraison_min ?? 10)} à ${fmt(data.parametres.livraison_max ?? 25)} selon la distance, à confirmer`) : null,
+      `*Total articles : ${fmt(cf.total)}*${cf.mode === "livraison" ? " + livraison" : ""}, à régler à la réception`,
       cf.remarque ? `\nRemarque : ${cf.remarque}` : null,
       ``,
       `Stock réservé. Fiche : ${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${ref}`,
@@ -507,7 +514,7 @@
     $("#drawerFoot").innerHTML = `
       <div class="eyebrow" style="text-align:center">${esc(t("step2"))}</div>
       <a class="btn btn-wa btn-block" href="${url}" target="_blank" rel="noopener" id="waLink">${ICON.wa} ${esc(t("send_on_whatsapp"))}</a>
-      <div class="hint">${esc(t("pay_on_delivery", { amount: money(cf.total) }))}</div>
+      <div class="hint">${esc(t("pay_on_delivery", { amount: money(cf.total) }))}${cf.mode === "livraison" ? ` · ${esc(t("excl_delivery"))}` : ""}</div>
       <button class="linkish" id="nouvelle">${esc(t("back_to_shop"))}</button>`;
     $("#nouvelle").onclick = () => { confirmation = null; closeDrawer(); };
     $("#waLink").onclick = () => { marquerEnvoyee(cf.id); setTimeout(() => toast(t("thanks", { shop: shopName() })), 500); };
@@ -571,12 +578,13 @@
 
   // ---------- Événements ----------
   document.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-supp],[data-open],[data-target]");
+    const el = e.target.closest("[data-plus],[data-moins],[data-remove],[data-qty4],[data-supp],[data-allerg],[data-open],[data-target]");
     if (!el) return;
     if (el.dataset.plus) { e.preventDefault(); addToCart(el.dataset.plus); }
     else if (el.dataset.moins) { e.preventDefault(); removeFromCart(el.dataset.moins); }
     else if (el.dataset.remove) removeFromCart(el.dataset.remove, 999);
     else if (el.dataset.supp) { const sp = produit(el.dataset.supp), par = produit(el.dataset.parent); if (sp && par && cart[par.id]) { cart[sp.id] = cart[par.id]; saveCart(); toast(t("toast_added", { name: nomP(sp) })); refreshCartUI(); } }
+    else if (el.dataset.allerg) { const k = el.dataset.allerg; if (sans.has(k)) sans.delete(k); else sans.add(k); renderAllerg(); renderCatalogue(); observeSections(); }
     else if (el.dataset.qty4) { const p = produit(el.dataset.qty4); if (p) { cart[p.id] = Math.min(4, stockMax(p)); saveCart(); refreshCartUI(); renderCatalogue(); } }
     else if (el.dataset.open) openModal(el.dataset.open);
     else if (el.dataset.target) {
@@ -611,7 +619,7 @@
   }, { rootMargin: "-90px 0px -70% 0px" });
   const observeSections = () => $$(".section").forEach((s) => io.observe(s));
 
-  function renderAll() { renderInfos(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); $("#reassure").textContent = t("footer_line") + " · " + t("steps"); }
+  function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); $("#reassure").textContent = t("footer_line") + " · " + t("steps"); }
 
   // ---------- Chargement ----------
   async function recharger() {

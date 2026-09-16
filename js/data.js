@@ -6,7 +6,9 @@
 // ============================================================
 (function () {
   const cfg = window.BIANCHI_CONFIG || {};
-  const useSupabase = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
+  // « ?demo=1 » dans l'adresse force le mode démo (données locales) même quand Supabase est configuré : utile pour tester sans toucher à la production.
+  const forceDemo = /[?&]demo=1/.test(location.search) || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  const useSupabase = !forceDemo && !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && window.supabase);
 
   const uid = () => (crypto.randomUUID ? crypto.randomUUID() : "id-" + Math.random().toString(36).slice(2) + Date.now());
   const clone = (o) => JSON.parse(JSON.stringify(o));
@@ -74,8 +76,7 @@
         const p = d.produits.find((x) => x.id === l.produit_id);
         if (p.suivre_stock) p.stock = (p.stock || 0) - l.qte;
       }
-      const seuil = Number(d.parametres.livraison_offerte_des || 0);
-      if (client.mode === "livraison" && d.parametres.livraison_active && !(seuil > 0 && total >= seuil)) total += Number(d.parametres.frais_livraison || 0);
+      // Livraison facturée à la réception selon la distance : jamais ajoutée au total
       const numero = (d.commandes.reduce((m, c) => Math.max(m, c.numero || 0), 0) || 0) + 1;
       const code = codeCommande(d.commandes);
       const commande = {

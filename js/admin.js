@@ -209,11 +209,11 @@
     const groupes = cats().map((c) => ({ c, ps: data.produits.filter((x) => x.categorie_id === c.id).sort((a, b) => (a.ordre || 0) - (b.ordre || 0)) }));
     const orphelins = data.produits.filter((x) => !data.categories.some((c) => c.id === x.categorie_id));
     page.innerHTML = `
-      <div class="page-head"><div><h2>Produits & catégories</h2><p>Prix, descriptions, photos, étiquettes promo.</p></div>
+      <div class="page-head"><div><h2>Produits & catégories</h2><p>Prix, descriptions, photos, étiquettes promo. Glissez une ligne (poignée ⋮⋮) ou utilisez ▲▼ pour changer l'ordre d'affichage.</p></div>
         <div class="page-actions"><button class="btn btn-ghost btn-sm" id="addCat">+ Catégorie</button><button class="btn btn-ink btn-sm" id="addProd">+ Produit</button></div></div>
       ${groupes.map((g) => `
         <div class="group-title">${esc(g.c.emoji || "")} ${esc(g.c.nom)} <small>${g.ps.length} produit${g.ps.length > 1 ? "s" : ""}</small><button class="icon-btn" data-editcat="${g.c.id}" title="Modifier la catégorie">✏️</button></div>
-        <div class="list">${g.ps.map(produitItem).join("") || `<p class="hint" style="color:var(--muted);font-size:13px">Aucun produit dans cette catégorie.</p>`}</div>`).join("")}
+        <div class="list sortable" data-cat="${g.c.id}">${g.ps.map(produitItem).join("") || `<p class="hint" style="color:var(--muted);font-size:13px">Aucun produit dans cette catégorie.</p>`}</div>`).join("")}
       ${orphelins.length ? `<div class="group-title">Sans catégorie</div><div class="list">${orphelins.map(produitItem).join("")}</div>` : ""}`;
     $("#addProd").onclick = () => formProduit({});
     $("#addCat").onclick = () => formCategorie({});
@@ -228,14 +228,39 @@
       const p = data.produits.find((x) => x.id === b.dataset.toggle);
       await api.upsertProduit({ ...p, actif: p.actif === false }); toast(p.actif === false ? "Produit visible" : "Produit masqué"); recharger();
     });
+    // ---- Ordre d'affichage : glisser-déposer ou flèches ----
+    async function saveOrder(list) {
+      const ids = [...list.querySelectorAll(".item[data-pid]")].map((el) => el.dataset.pid);
+      const changes = ids.map((id, i) => ({ p: data.produits.find((x) => x.id === id), ordre: i + 1 })).filter((x) => x.p && x.p.ordre !== x.ordre);
+      try { for (const ch of changes) await api.upsertProduit({ ...ch.p, ordre: ch.ordre }); if (changes.length) toast("Ordre enregistré"); recharger(); } catch (e) { toast(e.message, true); }
+    }
+    page.querySelectorAll(".list.sortable").forEach((list) => {
+      let dragged = null;
+      list.addEventListener("dragstart", (e) => { dragged = e.target.closest(".item"); if (dragged) { dragged.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; } });
+      list.addEventListener("dragend", () => { if (dragged) { dragged.classList.remove("dragging"); dragged = null; } });
+      list.addEventListener("dragover", (e) => {
+        if (!dragged) return; e.preventDefault();
+        const over = e.target.closest(".item"); if (!over || over === dragged || over.parentElement !== list) return;
+        const r = over.getBoundingClientRect(); list.insertBefore(dragged, e.clientY < r.top + r.height / 2 ? over : over.nextSibling);
+      });
+      list.addEventListener("drop", (e) => { e.preventDefault(); if (dragged) saveOrder(list); });
+    });
+    page.querySelectorAll("[data-up],[data-down]").forEach((b) => b.onclick = () => {
+      const item = b.closest(".item"), list = item.parentElement;
+      if (b.dataset.up && item.previousElementSibling) list.insertBefore(item, item.previousElementSibling);
+      else if (b.dataset.down && item.nextElementSibling) list.insertBefore(item.nextElementSibling, item);
+      else return;
+      saveOrder(list);
+    });
   }
   function produitItem(p) {
-    return `<div class="item${p.actif === false ? " inactif" : ""}">
+    return `<div class="item${p.actif === false ? " inactif" : ""}" draggable="true" data-pid="${p.id}">
+      <div class="drag" title="Glisser pour réordonner">⋮⋮</div>
       <div class="item-thumb">${p.image_url ? `<img src="${esc(p.image_url)}" alt="">` : catEmoji(p.categorie_id)}</div>
       <div class="item-main"><b>${esc(p.nom)}</b><small>${esc(p.description || "")}</small>
         <div class="pills">${p.supplement ? `<span class="pill pill-line">Supplément</span>` : ""}${p.vedette ? `<span class="pill pill-ink">★ Vitrine du jour</span>` : ""}${p.promo_label ? `<span class="pill pill-gold">${esc(p.promo_label)}</span>` : ""}${p.ancien_prix ? `<span class="pill pill-line">avant ${dhTxt(p.ancien_prix)}</span>` : ""}${p.suivre_stock ? `<span class="pill ${(p.stock || 0) > 0 ? "pill-good" : "pill-bad"}">${p.stock || 0} en stock</span>` : `<span class="pill pill-line">Sur commande</span>`}${p.actif === false ? `<span class="pill pill-line">Masqué</span>` : ""}</div></div>
       <div class="item-price num">${dhTxt(p.prix)}</div>
-      <div class="item-actions"><button class="icon-btn" data-toggle="${p.id}" title="${p.actif === false ? "Rendre visible" : "Masquer du site"}">${p.actif === false ? "🙈" : "👁️"}</button><button class="icon-btn" data-edit="${p.id}" title="Modifier">✏️</button><button class="icon-btn danger" data-del="${p.id}" title="Supprimer">🗑️</button></div>
+      <div class="item-actions"><span class="updown"><button class="icon-btn" data-up="${p.id}" title="Monter">▲</button><button class="icon-btn" data-down="${p.id}" title="Descendre">▼</button></span><button class="icon-btn" data-toggle="${p.id}" title="${p.actif === false ? "Rendre visible" : "Masquer du site"}">${p.actif === false ? "🙈" : "👁️"}</button><button class="icon-btn" data-edit="${p.id}" title="Modifier">✏️</button><button class="icon-btn danger" data-del="${p.id}" title="Supprimer">🗑️</button></div>
     </div>`;
   }
 
@@ -414,7 +439,8 @@
           <h3>Commandes</h3>
           <label class="switch"><div><b>Livraison proposée</b><small>Sinon, uniquement à emporter.</small></div><input type="checkbox" name="livraison_active"${p.livraison_active !== false ? " checked" : ""}><span class="sw"></span></label>
           <div class="row2">
-            <div class="field"><label>Frais de livraison (DH)</label><input name="frais_livraison" type="number" min="0" step="0.5" value="${p.frais_livraison ?? 0}"></div>
+            <div class="field"><label>Livraison : de (DH)</label><input name="livraison_min" type="number" min="0" step="0.5" value="${p.livraison_min ?? 10}"></div>
+            <div class="field"><label>Livraison : à (DH) <small>(selon la distance, facturée à la réception)</small></label><input name="livraison_max" type="number" min="0" step="0.5" value="${p.livraison_max ?? 25}"></div>
             <div class="field"><label>Commande minimum (DH) <small>(0 = aucun)</small></label><input name="commande_min" type="number" min="0" step="0.5" value="${p.commande_min ?? 0}"></div>
           </div>
           <div class="field"><label>Livraison offerte à partir de (DH) <small>(0 = jamais · le panier affiche « plus que X DH pour la livraison offerte »)</small></label><input name="livraison_offerte_des" type="number" min="0" step="0.5" value="${p.livraison_offerte_des ?? 0}"></div>
@@ -435,7 +461,7 @@
       const row = {
         ...p, nom: f.nom.value.trim(), slogan: f.slogan.value.trim(), whatsapp: f.whatsapp.value.replace(/\D/g, ""), adresse: f.adresse.value.trim(), lien_maps: f.lien_maps.value.trim(),
         horaires: f.horaires.value.trim(), delai_texte: f.delai_texte.value.trim(), livraison_active: f.livraison_active.checked,
-        frais_livraison: Number(f.frais_livraison.value) || 0, commande_min: Number(f.commande_min.value) || 0, livraison_offerte_des: Number(f.livraison_offerte_des.value) || 0, message_ferme: f.message_ferme.value.trim(),
+        livraison_min: Number(f.livraison_min.value) || 0, livraison_max: Number(f.livraison_max.value) || 0, commande_min: Number(f.commande_min.value) || 0, livraison_offerte_des: Number(f.livraison_offerte_des.value) || 0, message_ferme: f.message_ferme.value.trim(),
         traductions: readTr(f, PARAM_TR),
       };
       try { await api.saveParametres(row); toast("Paramètres enregistrés"); recharger(); } catch (err) { toast(err.message, true); }
