@@ -102,6 +102,12 @@ Appliqués : mise en page bureau contenue à 1280 px, en-tête compact avec rech
 
 Numéro de commande : année (2 chiffres) + mois + jour + rang du jour, ex. `269151` = 1re commande du 15/9/2026. Il figure dans la confirmation, le message WhatsApp, l'admin et le lien direct `admin.html#cmd=269151`.
 
+## Offres promotionnelles (17/09/2026)
+
+Onglet **Promotions → Offres** de l'admin, sans code : « N achetés, M offerts » (les pièces les moins chères sont offertes) ou « −X % », sur une catégorie ou un produit. Le site affiche l'étiquette sur les cartes concernées, applique l'offre dans le panier (ligne « offert » ou remise, coup de pouce « ajoutez-en 1, il est offert », suggestion), la base la recalcule dans `passer_commande` (colonne `remise`, champs `offert`/`remise` par article), et le message WhatsApp liste la pièce offerte à préparer. Règle partagée dans `js/offres.js`, script SQL `supabase/2026-09-17-offres.sql`.
+
+Message WhatsApp (gabarit du 17/09/2026) : en-tête « COMMANDE n° · LIVRAISON/RETRAIT » et date-créneau en gras (visibles dans la notification), bloc « À PRÉPARER : N pièces » avec une ligne par article et les pièces offertes à part, remarque client, « À ENCAISSER » en un seul montant, bloc « LIVRER À » (lien Maps, complément), client et langue de réponse, lien fiche admin en dernier.
+
 ## Cinq langues
 
 Tout le texte visible par les clients existe en **français, arabe, anglais, allemand et néerlandais** ; l'arabe s'affiche de droite à gauche. Le sélecteur de langue est en haut du site et la langue est mémorisée ; au premier passage, celle du navigateur est choisie.
