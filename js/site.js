@@ -283,14 +283,14 @@
   }
   function suggestionsHtml(lines, mode) {
     lines = lines.filter((l) => !isSupp(l.p));
-    if (!lines.length || lines.length >= 4) return "";
+    if (!lines.length) return "";
     const inCart = new Set(lines.map((l) => l.p.id)), catsIn = new Set(lines.map((l) => l.p.categorie_id));
     const pool = data.produits.filter((p) => p.actif !== false && !isSupp(p) && dispo(p) && !inCart.has(p.id));
     const picks = [];
     const push = (p, why) => { if (p && !picks.some((x) => x.p === p) && picks.length < 3) picks.push({ p, why }); };
     // 2. Combler la livraison offerte : le produit le moins cher qui atteint le seuil
     const seuil = seuilOffert(), reste = seuil - sousTotal();
-    if (mode === "livraison" && seuil > 0 && reste > 0 && reste <= 30) {
+    if (data.parametres.livraison_active && seuil > 0 && reste > 0 && reste <= 30) {
       const cand = pool.filter((p) => p.prix >= reste && p.prix > 5).sort((a, b) => a.prix - b.prix)[0];
       if (cand) push(cand, t("why_free_delivery"));
     }
@@ -408,7 +408,7 @@
           ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button></div>`
           : `<button class="supp-add" data-supp="${sp.id}" data-parent="${l.p.id}">${esc(t("supp_add", { name: nomP(sp), price: money(sp.prix) }))}</button>`).join("")}`).join("")}</div>
       ${offresHtml(lines)}
-      ${mode === "livraison" && p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 && !livraisonOfferte() ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>` : ""}</div>` : ""}
+      ${p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 && !livraisonOfferte() ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>` : ""}</div>` : ""}
       ${suggestionsHtml(lines, mode)}
 
       <form class="form" id="formCommande" novalidate>

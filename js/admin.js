@@ -478,10 +478,7 @@
       <form id="fparam">
         <div class="panel">
           <h3>Boutique</h3>
-          <div class="row2">
-            <div class="field"><label>Nom</label><input name="nom" value="${esc(p.nom || "")}"></div>
-            <div class="field"><label>Slogan</label><input name="slogan" value="${esc(p.slogan || "")}"></div>
-          </div>
+          <div class="field"><label>Slogan</label><input name="slogan" value="${esc(p.slogan || "")}"></div>
           <div class="field"><label>Numéro WhatsApp <small>(format international sans +, ex. 2126XXXXXXXX)</small></label><input name="whatsapp" inputmode="numeric" value="${esc(p.whatsapp || "")}"></div>
           <div class="row2">
             <div class="field"><label>Adresse / ville</label><input name="adresse" value="${esc(p.adresse || "")}"></div>
@@ -516,7 +513,7 @@
     f.onsubmit = async (e) => {
       e.preventDefault();
       const row = {
-        ...p, nom: f.nom.value.trim(), slogan: f.slogan.value.trim(), whatsapp: f.whatsapp.value.replace(/\D/g, ""), adresse: f.adresse.value.trim(), lien_maps: f.lien_maps.value.trim(),
+        ...p, nom: p.nom || "Bianchi Dessert", slogan: f.slogan.value.trim(), whatsapp: f.whatsapp.value.replace(/\D/g, ""), adresse: f.adresse.value.trim(), lien_maps: f.lien_maps.value.trim(),
         horaires: f.horaires.value.trim(), delai_texte: f.delai_texte.value.trim(), livraison_active: f.livraison_active.checked,
         livraison_min: Number(f.livraison_min.value) || 0, livraison_max: Number(f.livraison_max.value) || 0, commande_min: Number(f.commande_min.value) || 0, livraison_offerte_des: Number(f.livraison_offerte_des.value) || 0, message_ferme: f.message_ferme.value.trim(),
         traductions: readTr(f, PARAM_TR),
