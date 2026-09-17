@@ -15,6 +15,8 @@
 
   const S = {
     fr: {
+      free_delivery_done: "Livraison offerte, bravo !",
+      take_n: "Prenez-en {n} pour {price}",
       offer_pct: "−{v} %",
       offer_badge: "{a} achetés = {o} offert",
       offer_free_line: "{n} × {name} offert",
@@ -185,6 +187,8 @@
       language: "Langue",
     },
     ar: {
+      free_delivery_done: "التوصيل مجاني، مبروك!",
+      take_n: "خذ {n} بـ {price}",
       offer_pct: "خصم {v}٪",
       offer_badge: "اشترِ {a} واحصل على {o} مجاناً",
       offer_free_line: "{n} × {name} مجاناً",
@@ -355,6 +359,8 @@
       language: "اللغة",
     },
     en: {
+      free_delivery_done: "Free delivery unlocked!",
+      take_n: "Take {n} for {price}",
       offer_pct: "−{v} %",
       offer_badge: "Buy {a}, get {o} free",
       offer_free_line: "{n} × {name} free",
@@ -525,6 +531,8 @@
       language: "Language",
     },
     de: {
+      free_delivery_done: "Kostenlose Lieferung freigeschaltet!",
+      take_n: "{n} Stück für {price}",
       offer_pct: "−{v} %",
       offer_badge: "{a} kaufen, {o} gratis",
       offer_free_line: "{n} × {name} gratis",
@@ -695,6 +703,8 @@
       language: "Sprache",
     },
     nl: {
+      free_delivery_done: "Gratis bezorging gehaald!",
+      take_n: "Neem er {n} voor {price}",
       offer_pct: "−{v} %",
       offer_badge: "{a} kopen, {o} gratis",
       offer_free_line: "{n} × {name} gratis",

@@ -522,3 +522,21 @@ html { overflow-x: clip; }
 /* Choix du mode : fourchette de livraison sous le libellé */
 .modes label { flex-wrap: wrap; }
 .modes .mode-note { display: block; width: 100%; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 2px; }
+
+/* Livraison offerte atteinte : barre pleine en noir, texte noir, confettis une seule fois */
+.progress { position: relative; }
+.progress.done .bar span { background: var(--ink); }
+.progress.done small { color: var(--text); }
+html[data-theme="dark"] .progress.done .bar span { background: var(--gold); }
+.progress .confetti { position: absolute; inset: -18px 0 auto 0; height: 0; pointer-events: none; }
+.progress .confetti i { position: absolute; left: 50%; top: 0; width: 7px; height: 11px; border-radius: 2px; opacity: 0; }
+.progress.celebrate .confetti i { animation: confetti .95s cubic-bezier(.2,.7,.3,1) forwards; }
+.confetti i:nth-child(4n+1) { background: var(--gold); } .confetti i:nth-child(4n+2) { background: var(--ink); } .confetti i:nth-child(4n+3) { background: var(--good); } .confetti i:nth-child(4n) { background: #E9C46A; }
+.confetti i:nth-child(1) { --dx: -150px; --dy: -70px; --r: 200deg; } .confetti i:nth-child(2) { --dx: -120px; --dy: -110px; --r: -160deg; } .confetti i:nth-child(3) { --dx: -90px; --dy: -60px; --r: 120deg; } .confetti i:nth-child(4) { --dx: -60px; --dy: -120px; --r: -90deg; }
+.confetti i:nth-child(5) { --dx: -30px; --dy: -80px; --r: 260deg; } .confetti i:nth-child(6) { --dx: 0px; --dy: -130px; --r: -200deg; } .confetti i:nth-child(7) { --dx: 30px; --dy: -75px; --r: 140deg; } .confetti i:nth-child(8) { --dx: 60px; --dy: -115px; --r: -120deg; }
+.confetti i:nth-child(9) { --dx: 90px; --dy: -65px; --r: 220deg; } .confetti i:nth-child(10) { --dx: 120px; --dy: -105px; --r: -70deg; } .confetti i:nth-child(11) { --dx: 150px; --dy: -80px; --r: 180deg; } .confetti i:nth-child(12) { --dx: -140px; --dy: -30px; --r: 90deg; }
+.confetti i:nth-child(13) { --dx: 140px; --dy: -35px; --r: -240deg; } .confetti i:nth-child(14) { --dx: -75px; --dy: -20px; --r: 300deg; } .confetti i:nth-child(15) { --dx: 75px; --dy: -25px; --r: -300deg; } .confetti i:nth-child(16) { --dx: 10px; --dy: -50px; --r: 60deg; }
+@keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(.6); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 90px)) rotate(var(--r)) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .progress.celebrate .confetti i { animation: none; } }
+/* Raccourci « Prenez-en 4 » : pastille explicite sous le nom, plus dans le compteur */
+.line-name .take4 { align-self: flex-start; display: inline-flex; align-items: center; height: 26px; margin-top: 6px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--gold); background: var(--gold-tint, transparent); color: var(--gold-deep); font-family: var(--body); font-size: 12px; font-weight: 700; cursor: pointer; }

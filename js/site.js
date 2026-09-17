@@ -28,6 +28,7 @@
   let sans = new Set();   // allergènes exclus par le client
   let bestSellerId = null; // meilleure vente automatique (30 jours), calculée côté base
   let confirmation = null;
+  let dernierOfferte = false; // pour ne lancer les confettis qu'au moment où la livraison devient offerte
   let clientInfo = loadClient();
   let gps = null;
   let gpsRefuse = false;
@@ -326,6 +327,7 @@
     const sub = $("#cartFabSub"); if (sub) { const seuil = seuilOffert(), reste = seuil - sousTotal(); sub.textContent = (n && seuil > 0 && (data.parametres || {}).livraison_active !== false) ? (reste > 0 ? t("fab_free_left", { amount: money(reste) }) : t("free_delivery")) : ""; sub.hidden = !sub.textContent; }
     $("#cartTopCount").textContent = n; $("#cartTopTotal").textContent = n ? money(sousTotal()) : ""; $("#cartTop").classList.toggle("hidden", n === 0);
     if ($("#drawer").classList.contains("open")) renderDrawer();
+    dernierOfferte = livraisonOfferte();
   }
 
   // ---------- GPS ----------
@@ -400,15 +402,15 @@
     body.innerHTML = `
       <div>${lines.filter((l) => !isSupp(l.p)).map((l) => `
         <div class="line">
-          <div class="line-name"><b>${esc(nomP(l.p))}</b><small class="num">${esc(t("unit_price", { price: money(l.p.prix) }))}${l.p.suivre_stock ? ` · ${esc(l.p.stock - l.qte <= 1 ? t("suggest_last") : t("in_stock", { n: l.p.stock }))}` : ""}</small><button class="remove" data-remove="${l.p.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button></div>
-          <span class="stepper"><button data-moins="${l.p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${l.qte}</span><button data-plus="${l.p.id}" aria-label="${esc(t("more"))}">+</button>${l.p.prix <= 10 && l.qte < 4 && stockMax(l.p) >= 4 ? `<button class="x4" data-qty4="${l.p.id}">${esc(t("qty4"))}</button>` : ""}</span>
+          <div class="line-name"><b>${esc(nomP(l.p))}</b><small class="num">${esc(t("unit_price", { price: money(l.p.prix) }))}${l.p.suivre_stock ? ` · ${esc(l.p.stock - l.qte <= 1 ? t("suggest_last") : t("in_stock", { n: l.p.stock }))}` : ""}</small><button class="remove" data-remove="${l.p.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button>${l.p.prix <= 10 && l.qte < 4 && stockMax(l.p) >= 4 ? `<button class="take4" data-qty4="${l.p.id}">${esc(t("take_n", { n: 4, price: money(l.p.prix * 4) }))}</button>` : ""}</div>
+          <span class="stepper"><button data-moins="${l.p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${l.qte}</span><button data-plus="${l.p.id}" aria-label="${esc(t("more"))}">+</button></span>
           <span class="line-price num">${esc(money(l.p.prix * l.qte))}</span>
         </div>
         ${suppFor(l.p).map((sp) => cart[sp.id]
           ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button></div>`
           : `<button class="supp-add" data-supp="${sp.id}" data-parent="${l.p.id}">${esc(t("supp_add", { name: nomP(sp), price: money(sp.prix) }))}</button>`).join("")}`).join("")}</div>
       ${offresHtml(lines)}
-      ${p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 && !livraisonOfferte() ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>` : ""}</div>` : ""}
+      ${p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 ? (livraisonOfferte() ? `<div class="progress done${!dernierOfferte ? " celebrate" : ""}"><div class="bar"><span style="width:100%"></span></div><small>${esc(t("free_delivery_done"))}</small><div class="confetti" aria-hidden="true">${"<i></i>".repeat(16)}</div></div>` : `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>`) : ""}</div>` : ""}
       ${suggestionsHtml(lines, mode)}
 
       <form class="form" id="formCommande" novalidate>
