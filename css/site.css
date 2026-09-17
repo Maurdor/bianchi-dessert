@@ -480,3 +480,9 @@ html { overflow-x: clip; }
   .topbar-search.desk { display: block !important; }
   .micro.desk { display: flex !important; }
 }
+
+/* Mention « Fournée du jour » : coupure seulement après le point médian ; « 4ᵉ » centré dans son rond */
+.mention .m1, .mention .m2 { white-space: nowrap; }
+.mention-row { align-items: flex-start; }
+.mention-row .status-pill { flex: none; margin-top: 2px; }
+.banniere-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-variant-numeric: lining-nums; padding-bottom: 1px; }

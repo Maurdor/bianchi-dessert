@@ -94,7 +94,7 @@
       sel.value = L.lang;
       sel.setAttribute("aria-label", t("language"));
     });
-    $("#dateDesk").textContent = `${t("batch_of_day")} · ${L.date(new Date())}`;
+    $("#dateDesk").innerHTML = `<span class="m1">${esc(t("batch_of_day"))} ·</span> <span class="m2">${esc(L.date(new Date()))}</span>`;
   }
 
   // ---------- Infos boutique ----------
