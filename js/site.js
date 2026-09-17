@@ -421,7 +421,7 @@
           </div></div>
         <div class="eyebrow" style="margin-top:8px">${esc(t("pickup"))}</div>
         <div class="modes">
-          ${p.livraison_active ? `<label><input type="radio" name="mode" value="livraison"${mode === "livraison" ? " checked" : ""}>${ICON.bike} ${esc(t("delivery"))}${Number(p.frais_livraison) ? ` · ${esc(money(p.frais_livraison))}` : ""}</label>` : ""}
+          ${p.livraison_active ? `<label><input type="radio" name="mode" value="livraison"${mode === "livraison" ? " checked" : ""}>${ICON.bike} ${esc(t("delivery"))}<small class="mode-note">${esc(t("delivery_courier", { min: nb(p.livraison_min ?? 10), max: money(p.livraison_max ?? 30) }))}</small></label>` : ""}
           <label><input type="radio" name="mode" value="retrait"${mode === "retrait" ? " checked" : ""}>${ICON.bag} ${esc(t("takeaway"))}</label>
         </div>
         <div id="livraisonBloc"${mode === "livraison" ? "" : " hidden"}>

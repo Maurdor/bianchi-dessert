@@ -518,3 +518,7 @@ html { overflow-x: clip; }
 .offer-row .num, .offer-total .num { color: var(--good); font-weight: 700; }
 .offer-total { border-top: 1px solid var(--line-soft); margin-top: 4px; padding-top: 6px; font-weight: 700; }
 .offer-nudge { margin-top: 4px; font-weight: 700; color: var(--gold-deep); }
+
+/* Choix du mode : fourchette de livraison sous le libellé */
+.modes label { flex-wrap: wrap; }
+.modes .mode-note { display: block; width: 100%; font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 2px; }
