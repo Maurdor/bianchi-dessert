@@ -179,3 +179,10 @@ body { background: var(--cream); }
 
 .order-lines .offert { color: var(--good, #2e7d4f); font-weight: 600; }
 .pill-ok { background: #e3f2e8; color: #2e7d4f; }
+
+/* Cadrage de la photo produit : aperçu au format des cartes du site, image déplaçable */
+.frame-box { position: relative; width: 100%; max-width: 320px; aspect-ratio: 358 / 230; border-radius: 12px; overflow: hidden; background: #E8DFD2; cursor: grab; touch-action: none; user-select: none; }
+.frame-box:active { cursor: grabbing; }
+.frame-box img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.frame-tools { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 13px; color: var(--muted); max-width: 320px; }
+.frame-tools input[type=range] { flex: 1; accent-color: var(--gold); }

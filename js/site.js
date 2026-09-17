@@ -81,7 +81,9 @@
     return out;
   };
   const badgesHtml = (p) => { const ls = p.vedette ? [] : labelsDe(p); return ls.length ? `<div class="badges">${ls.map((l) => `<span class="badge badge-promo">${esc(l)}</span>`).join("")}</div>` : ""; };
-  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo${dispo(p) ? "" : " soldout"}" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 16 0v2H4V9ZM3 11h18M5 14h14l-1 6H6l-1-6Z"/></svg><span>${esc(t("photo_soon"))}</span></div>`}${!dispo(p) ? `<span class="badge badge-out">${esc(t("out_today"))}</span>` : badgesHtml(p)}${extra}</div>`;
+  // Cadrage choisi dans l'admin : point de mise au point (object-position) et zoom
+  const imgStyle = (p) => { const pos = (p.image_pos || "50% 50%").trim(); const z = Number(p.image_zoom) || 1; return `object-position:${pos}${z > 1 ? `;transform:scale(${z});transform-origin:${pos}` : ""}`; };
+  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo${dispo(p) ? "" : " soldout"}" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy" style="${imgStyle(p)}">` : `<div class="ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 16 0v2H4V9ZM3 11h18M5 14h14l-1 6H6l-1-6Z"/></svg><span>${esc(t("photo_soon"))}</span></div>`}${!dispo(p) ? `<span class="badge badge-out">${esc(t("out_today"))}</span>` : badgesHtml(p)}${extra}</div>`;
 
   // ---------- Textes statiques ----------
   function applyStatic() {
@@ -211,7 +213,7 @@
     const stockBadge = p.suivre_stock ? `<span class="badge badge-stock ${k}"><span class="dot"></span>${esc(stockTxt(p))}</span>` : "";
     const al = c(p, "allergenes");
     return `<article class="featured" data-id="${p.id}">
-      <div class="featured-photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}">` : `<div class="ph"><span>${esc(t("photo_soon"))}</span></div>`}<span class="badge badge-signature">${esc(t("signature"))}</span>${stockBadge}</div>
+      <div class="featured-photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" style="${imgStyle(p)}">` : `<div class="ph"><span>${esc(t("photo_soon"))}</span></div>`}<span class="badge badge-signature">${esc(t("signature"))}</span>${stockBadge}</div>
       <div class="featured-body">
         <div class="row"><h3 data-open="${p.id}">${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
@@ -304,7 +306,7 @@
     // 5. Dernières pièces
     pool.filter((p) => stockKind(p) === "warn" && p.prix >= 15).forEach((p) => push(p, t("why_last")));
     if (!picks.length) return "";
-    return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map(({ p, why }) => `<div class="suggest-item"><div class="photo sm" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}</div><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${why === t("why_last") ? "warn" : ""}">${esc(why)}${p.suivre_stock && (p.stock || 0) <= 3 ? " · " + esc(stockTxt(p)) : ""}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
+    return `<div class="suggest"><div class="eyebrow">${esc(t("complete_order"))}</div>${picks.map(({ p, why }) => `<div class="suggest-item"><div class="photo sm" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="" loading="lazy" style="${imgStyle(p)}">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}</div><div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b><small class="${why === t("why_last") ? "warn" : ""}">${esc(why)}${p.suivre_stock && (p.stock || 0) <= 3 ? " · " + esc(stockTxt(p)) : ""}</small></div><div class="a">${priceHtml(p.prix)}${actionHtml(p)}</div></div>`).join("")}</div>`;
   }
 
   function syncSupplements() {

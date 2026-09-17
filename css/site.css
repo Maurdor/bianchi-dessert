@@ -540,3 +540,6 @@ html[data-theme="dark"] .progress.done .bar span { background: var(--gold); }
 @media (prefers-reduced-motion: reduce) { .progress.celebrate .confetti i { animation: none; } }
 /* Raccourci « Prenez-en 4 » : pastille explicite sous le nom, plus dans le compteur */
 .line-name .take4 { align-self: flex-start; display: inline-flex; align-items: center; height: 26px; margin-top: 6px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--gold); background: var(--gold-tint, transparent); color: var(--gold-deep); font-family: var(--body); font-size: 12px; font-weight: 700; cursor: pointer; }
+
+/* Cadrage : le zoom choisi dans l'admin ne doit jamais déborder du cadre */
+.photo, .featured-photo, .suggest-item .photo.sm { overflow: hidden; }

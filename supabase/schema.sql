@@ -642,3 +642,8 @@ begin
 end;
 $$;
 grant execute on function public.passer_commande(jsonb, jsonb) to anon, authenticated;
+
+-- 17/09/2026 : cadrage des photos (voir 2026-09-17-cadrage.sql)
+-- Cadrage des photos produit choisi dans l'admin : point de mise au point (object-position) et zoom
+alter table public.produits add column if not exists image_pos text default '50% 50%';
+alter table public.produits add column if not exists image_zoom numeric(4,2) default 1;

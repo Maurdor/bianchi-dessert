@@ -276,6 +276,7 @@
   function formProduit(p) {
     const isNew = !p.id;
     let imageUrl = p.image_url || "";
+    let imagePos = (p.image_pos || "50% 50%").trim(), imageZoom = Number(p.image_zoom) || 1;
     openModal(`
       <h3>${isNew ? "Nouveau produit" : "Modifier le produit"}</h3>
       <form id="fp" class="panel" style="box-shadow:none;padding:0;margin:0">
@@ -296,6 +297,10 @@
         <div class="field"><label>Photo</label>
           <div class="img-pick"><div class="item-thumb" id="thumb">${imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : catEmoji(p.categorie_id)}</div>
             <div class="btns"><label class="btn btn-ghost btn-sm">📷 Choisir une photo<input type="file" accept="image/*" id="imgFile" hidden></label><button type="button" class="btn btn-ghost btn-sm" id="imgUrlBtn">🔗 Coller un lien</button>${imageUrl ? `<button type="button" class="btn btn-danger btn-sm" id="imgDel">Retirer</button>` : ""}</div></div></div>
+        <div class="field" id="cadrage"${imageUrl ? "" : " hidden"}><label>Cadrage <small>Glissez la photo pour placer ce qui compte au centre, puis zoomez si besoin. Le même cadrage sert partout sur le site.</small></label>
+          <div class="frame-box" id="frameBox"><img id="frameImg" src="${esc(imageUrl)}" alt="" draggable="false"></div>
+          <div class="frame-tools"><span>Zoom</span><input type="range" id="frameZoom" min="1" max="3" step="0.05" value="${imageZoom}"><button type="button" class="btn btn-ghost btn-sm" id="frameReset">Recentrer</button></div>
+        </div>
         <label class="switch"><div><b>Visible sur le site</b></div><input type="checkbox" name="actif"${p.actif !== false ? " checked" : ""}><span class="sw"></span></label>
         <label class="switch"><div><b>Supplément (option)</b><small>Jamais vendu seul : proposé avec les produits de sa catégorie au même format (« — Petit » / « — Grand »).</small></div><input type="checkbox" name="supplement"${p.supplement ? " checked" : ""}><span class="sw"></span></label>
         <label class="switch"><div><b>★ Mettre en avant</b><small>Affiché en grand dans « La vitrine du jour », en haut du site.</small></div><input type="checkbox" name="vedette"${p.vedette ? " checked" : ""}><span class="sw"></span></label>
@@ -304,7 +309,19 @@
       </form>`);
     const f = $("#fp");
     wireAutoTr(f, PROD_TR, (k) => ({ nom: f.nom.value, description: f.description.value, promo_label: f.promo_label.value, allergenes: f.allergenes.value })[k]);
-    const setThumb = () => { $("#thumb").innerHTML = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : catEmoji(p.categorie_id); };
+    const setThumb = () => { $("#thumb").innerHTML = imageUrl ? `<img src="${esc(imageUrl)}" alt="">` : catEmoji(p.categorie_id); $("#cadrage").hidden = !imageUrl; if (imageUrl) { $("#frameImg").src = imageUrl; applyFrame(); } };
+    // Cadrage : glisser pour déplacer le point de mise au point, curseur pour zoomer
+    const applyFrame = () => { const im = $("#frameImg"); if (!im) return; im.style.objectPosition = imagePos; im.style.transform = imageZoom > 1 ? `scale(${imageZoom})` : ""; im.style.transformOrigin = imagePos; };
+    const posXY = () => imagePos.split(/\s+/).map((v) => parseFloat(v) || 50);
+    const setPos = (x, y) => { imagePos = `${Math.round(Math.min(100, Math.max(0, x)))}% ${Math.round(Math.min(100, Math.max(0, y)))}%`; applyFrame(); };
+    (() => { const box = $("#frameBox"); if (!box) return; let drag = null;
+      box.onpointerdown = (e) => { const [x, y] = posXY(); drag = { x0: e.clientX, y0: e.clientY, px: x, py: y }; box.setPointerCapture(e.pointerId); e.preventDefault(); };
+      box.onpointermove = (e) => { if (!drag) return; const r = box.getBoundingClientRect(); const k = 100 / Math.max(1, imageZoom); setPos(drag.px - (e.clientX - drag.x0) / r.width * k * 1.6, drag.py - (e.clientY - drag.y0) / r.height * k * 1.6); };
+      box.onpointerup = box.onpointercancel = () => { drag = null; };
+      $("#frameZoom").oninput = (e) => { imageZoom = Number(e.target.value) || 1; applyFrame(); };
+      $("#frameReset").onclick = () => { imageZoom = 1; $("#frameZoom").value = 1; setPos(50, 50); };
+      applyFrame();
+    })();
     const syncStock = () => { $("#stockField").hidden = !f.suivre_stock.checked; };
     syncStock(); f.suivre_stock.onchange = syncStock;
     $("#annuler").onclick = closeModal;
@@ -321,7 +338,7 @@
         id: p.id, nom: f.nom.value.trim(), categorie_id: Number(f.categorie_id.value), ordre: Number(f.ordre.value) || 0,
         description: f.description.value.trim(), prix: Number(f.prix.value), ancien_prix: f.ancien_prix.value ? Number(f.ancien_prix.value) : null,
         promo_label: f.promo_label.value.trim(), allergenes: f.allergenes.value.trim(), suivre_stock: f.suivre_stock.checked, stock: f.suivre_stock.checked ? Number(f.stock.value) || 0 : null,
-        image_url: imageUrl, actif: f.actif.checked, vedette: f.vedette.checked, supplement: f.supplement.checked, traductions: readTr(f, PROD_TR),
+        image_url: imageUrl, image_pos: imagePos, image_zoom: Math.round(imageZoom * 100) / 100, actif: f.actif.checked, vedette: f.vedette.checked, supplement: f.supplement.checked, traductions: readTr(f, PROD_TR),
       };
       if (!row.nom || isNaN(row.prix)) return toast("Nom et prix obligatoires", true);
       try { await api.upsertProduit(row); toast("Produit enregistré"); closeModal(); recharger(); } catch (err) { toast(err.message, true); }
