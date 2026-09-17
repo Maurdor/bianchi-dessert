@@ -487,8 +487,8 @@ html { overflow-x: clip; }
 .mention-row .status-pill { flex: none; margin-top: 2px; }
 .banniere-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-variant-numeric: lining-nums; padding-bottom: 1px; }
 
-/* Rond « 4ᵉ » : le groupe chiffre + exposant est centré d'un bloc dans le rond, l'exposant est collé en haut à droite du chiffre */
-.banniere-icon { position: relative; padding: 0; }
-.banniere-icon .n { display: inline-block; line-height: 1; font-size: 18px; font-weight: 700; transform: translateY(-1px); }
-.banniere-icon sup { position: static; display: inline-block; align-self: flex-start; margin: 2px 0 0 1px; font-size: 11px; line-height: 1; font-family: inherit; font-weight: 700; vertical-align: 0; }
-@media (min-width: 1024px) { .banniere-icon .n { font-size: 19px; } }
+/* Rond « 4ᵉ » : chiffre + exposant centrés d'un bloc (encre mesurée), exposant collé en haut à droite du chiffre */
+.banniere .banniere-icon { position: relative; display: flex; align-items: center; justify-content: center; gap: 0; padding: 3px 0 0; box-sizing: border-box; line-height: 1; }
+.banniere .banniere-icon .n { display: block; line-height: 1; font-size: 18px; font-weight: 700; transform: translateY(-1px); }
+.banniere .banniere-icon sup { position: static; display: block; align-self: flex-start; margin: 2px 0 0 1px; font-size: 11px; line-height: 1; font-family: inherit; font-weight: 700; vertical-align: 0; }
+@media (min-width: 1024px) { .banniere .banniere-icon .n { font-size: 19px; } }
