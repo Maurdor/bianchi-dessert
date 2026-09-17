@@ -98,8 +98,10 @@
   }
 
   // ---------- Infos boutique ----------
+  function setMicroDelivery() { const el = $("#microDelivery"); if (!el) return; const s = seuilOffert(); el.textContent = s > 0 ? t("micro_delivery", { amount: money(s) }) : t("micro_delivery_plain"); }
   function renderInfos() {
     const p = data.parametres || {};
+    setMicroDelivery();
     document.title = shopName();
     $("#slogan").textContent = p.slogan || "";
     $("#shopName").textContent = shopName();
@@ -172,9 +174,9 @@
       const avail = s.avail, sold = s.sold;
       const seuleVedette = avail.length === 1 && avail[0] === vedette && !sold.length;
       return `<section class="section${i === 0 ? " first" : ""}${seuleVedette ? " only-featured" : ""}${avail.length ? "" : " no-stock"}" id="${s.id}">
-        <div class="section-head"><div><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div><span class="section-count">${esc(t("n_desserts", { n: s.produits.length }))}</span></div>
+        <div class="section-head"><div><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div></div>
         ${avail.length ? `<div class="grid">${avail.map((p) => carte(p, p === vedette)).join("")}</div>` : ""}
-        ${sold.length ? `<details class="soldout"${avail.length ? "" : " open"}><summary>${esc(t("soldout_n", { n: sold.length }))}</summary><div class="grid">${sold.map((p) => carte(p)).join("")}</div></details>` : ""}
+        ${sold.length ? `<details class="soldout"${avail.length ? "" : " open"}><summary>${esc(t("soldout_n", { n: sold.length }))}</summary><div class="grid">${sold.map((p) => carte(p, false, s)).join("")}</div></details>` : ""}
       </section>`;
     }).join("");
   }
@@ -186,14 +188,16 @@
       ? `<span class="stepper ${size}"><button data-moins="${p.id}" aria-label="${esc(t("less"))}">−</button><span class="num">${q}</span><button data-plus="${p.id}" aria-label="${esc(t("more"))}">+</button></span>`
       : `<button class="plus" data-plus="${p.id}" aria-label="${esc(t("add_named", { name: nomP(p) }))}">+</button>`;
   }
-  function carte(p, isFeatured = false) {
+  const lowerCat = (n) => (["fr", "en", "nl"].includes(L.lang) ? n.toLocaleLowerCase(L.locale()) : n);
+  function carte(p, isFeatured = false, sec = null) {
+    const others = (!dispo(p) && sec && sec.avail.length) ? `<a class="see-others" href="#${sec.id}" data-target="${sec.id}">${esc(t("see_others", { cat: lowerCat(sec.nom) }))}</a>` : "";
     return `<article class="card${dispo(p) ? "" : " epuise"}${isFeatured ? " is-featured" : ""}" data-id="${p.id}">
       ${photoHtml(p)}
       <div class="card-body">
         <div class="card-title" data-open="${p.id}">${esc(nomP(p))}</div>
         ${c(p, "description") ? `<p class="card-desc">${esc(c(p, "description"))}</p>` : ""}
         <div class="stock-line ${stockKind(p)}"><span class="dot"></span>${esc(stockTxt(p))}</div>
-        <div class="card-foot">${priceHtml(p.prix, p.ancien_prix)}<span class="act">${actionHtml(p)}</span></div>
+        <div class="card-foot">${priceHtml(p.prix, p.ancien_prix)}<span class="act">${actionHtml(p)}</span></div>${others}
       </div>
     </article>`;
   }
@@ -291,6 +295,7 @@
     const lbl = $("#cartFab [data-i18n]"); if (lbl) lbl.textContent = t("order_cta");
     $("#cartN").textContent = n ? t("items_count", { n }) : "";
     $("#cartFab").classList.toggle("hidden", n === 0);
+    const sub = $("#cartFabSub"); if (sub) { const seuil = seuilOffert(), reste = seuil - sousTotal(); sub.textContent = (n && seuil > 0 && (data.parametres || {}).livraison_active !== false) ? (reste > 0 ? t("fab_free_left", { amount: money(reste) }) : t("free_delivery")) : ""; sub.hidden = !sub.textContent; }
     $("#cartTopCount").textContent = n; $("#cartTopTotal").textContent = n ? money(sousTotal()) : ""; $("#cartTop").classList.toggle("hidden", n === 0);
     if ($("#drawer").classList.contains("open")) renderDrawer();
   }

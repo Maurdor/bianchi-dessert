@@ -478,7 +478,6 @@ html { overflow-x: clip; }
   .status-pill.desk, .wa-pill.desk, .cart-top.desk { display: inline-flex !important; }
   .cart-top.desk.hidden { display: none !important; }
   .topbar-search.desk { display: block !important; }
-  .micro.desk { display: flex !important; }
 }
 
 /* Mention « Fournée du jour » : coupure seulement après le point médian ; « 4ᵉ » centré dans son rond */
@@ -502,3 +501,13 @@ html { overflow-x: clip; }
 .search-reveal.open { display: block; }
 @media (min-width: 1024px) { .search-reveal.open { display: none !important; } }
 #searchToggle.active { background: var(--gold); color: #fff; }
+
+/* Épuisés : lien vers les autres produits disponibles de la catégorie */
+.see-others { display: inline-block; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: var(--gold-deep); text-decoration: underline; text-underline-offset: 3px; }
+/* Héros mobile : mentions livraison + paiement sous le bouton « Voir la vitrine » */
+.hero .micro { gap: 8px 18px; }
+@media (max-width: 1023px) { .hero .micro { font-size: 12.5px; } }
+/* Barre panier mobile : seconde ligne « Encore X DH et la livraison est offerte » */
+.cart-fab .fab-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; line-height: 1.15; text-align: start; }
+.cart-fab .fab-sub { font-size: 11.5px; font-weight: 600; opacity: .8; }
+.cart-fab .fab-sub[hidden] { display: none; }

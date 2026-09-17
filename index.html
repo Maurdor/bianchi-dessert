@@ -16,8 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Manrope:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap">
   <script>try{var th=localStorage.getItem("bianchi_theme");if(th==="dark")document.documentElement.setAttribute("data-theme","dark");}catch(e){}</script>
-  <link rel="stylesheet" href="css/base.css?v=51">
-  <link rel="stylesheet" href="css/site.css?v=51">
+  <link rel="stylesheet" href="css/base.css?v=52">
+  <link rel="stylesheet" href="css/site.css?v=52">
 </head>
 <body>
 
@@ -71,9 +71,9 @@
       <h1><span data-i18n="showcase_a">La vitrine</span> <em data-i18n="showcase_b">du jour</em></h1>
       <p class="intro desk" data-i18n="intro"></p>
       <a class="btn-cta" href="#vitrine"><span data-i18n="see_showcase">Voir la vitrine</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
-      <div class="micro desk">
-        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg><span data-i18n="micro_stock">Stock en direct</span></span>
-        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg><span data-i18n="micro_wa">Message WhatsApp pré-rempli</span></span>
+      <div class="micro">
+        <span class="desk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg><span data-i18n="micro_stock">Stock en direct</span></span>
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg><span id="microDelivery">Retrait ou livraison, offerte dès 60 DH</span></span>
         <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg><span data-i18n="micro_pay">Paiement à la réception</span></span>
       </div>
     </div>
@@ -108,7 +108,7 @@
   </footer>
 
   <button class="cart-fab hidden" id="cartFab">
-    <span class="left"><span class="count" id="cartCount">0</span><span data-i18n="view_cart">Envoyer ma commande</span></span>
+    <span class="left"><span class="count" id="cartCount">0</span><span class="fab-txt"><span data-i18n="view_cart">Envoyer ma commande</span><span class="fab-sub" id="cartFabSub"></span></span></span>
     <span class="total num" id="cartFabTotal"></span>
   </button>
 
@@ -131,10 +131,10 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="js/config.js"></script>
-  <script src="js/i18n.js?v=51"></script>
+  <script src="js/i18n.js?v=52"></script>
   <script src="js/catalogue-traductions.js"></script>
-  <script src="js/demo-data.js?v=51"></script>
-  <script src="js/data.js?v=51"></script>
-  <script src="js/site.js?v=51"></script>
+  <script src="js/demo-data.js?v=52"></script>
+  <script src="js/data.js?v=52"></script>
+  <script src="js/site.js?v=52"></script>
 </body>
 </html>
