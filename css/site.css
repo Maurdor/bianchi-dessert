@@ -543,3 +543,8 @@ html[data-theme="dark"] .progress.done .bar span { background: var(--gold); }
 
 /* Cadrage : le zoom choisi dans l'admin ne doit jamais déborder du cadre */
 .photo, .featured-photo, .suggest-item .photo.sm { overflow: hidden; }
+
+/* Signature du pied de page : accroche Sidekick, discrète, à la ligne sur mobile */
+.credit { display: inline-flex; flex-wrap: wrap; column-gap: 6px; row-gap: 2px; align-items: baseline; }
+.credit-tag { font-style: italic; opacity: .75; white-space: nowrap; }
+@media (max-width: 480px) { .credit-tag { flex-basis: 100%; white-space: normal; } }
