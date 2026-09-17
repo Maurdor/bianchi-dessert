@@ -76,6 +76,7 @@
     const out = [];
     if (p.promo_label && !/best[- ]?seller/i.test(p.promo_label)) out.push(promoTxt(p));
     if (bestSellerId && p.id === bestSellerId) out.push(TR.promo_labels?.["Best-seller"]?.[L.lang] || "Best-seller");
+    offresDe(p).forEach((o) => out.push(offreLabel(o)));
     return out;
   };
   const badgesHtml = (p) => { const ls = p.vedette ? [] : labelsDe(p); return ls.length ? `<div class="badges">${ls.map((l) => `<span class="badge badge-promo">${esc(l)}</span>`).join("")}</div>` : ""; };
@@ -247,7 +248,16 @@
     saveCart(); refreshCartUI(); refreshCardActions(id);
   }
   const cartLines = () => Object.entries(cart).map(([id, qte]) => ({ p: produit(id), qte })).filter((l) => l.p);
-  const sousTotal = () => cartLines().reduce((s, l) => s + l.p.prix * l.qte, 0);
+  const sousTotalBrut = () => cartLines().reduce((s, l) => s + l.p.prix * l.qte, 0);
+  const OFF = window.BIANCHI_OFFRES;
+  const offresActives = () => ((data && data.offres) || []).filter((o) => o.actif !== false);
+  const remiseInfo = () => OFF ? OFF.calc(cartLines().filter((l) => !isSupp(l.p)), offresActives()) : { remise: 0, details: [], par: {} };
+  // Sous-total après offres : c'est lui qui s'affiche partout et qui sert au seuil de livraison offerte
+  const sousTotal = () => OFF.round2(sousTotalBrut() - remiseInfo().remise);
+  const offreLabel = (o) => o.type === "pourcent" ? t("offer_pct", { v: nb(o.pourcent) }) : t("offer_badge", { a: Number(o.achetes) || 3, o: Number(o.offerts) || 1 });
+  const offreCourte = (o) => o.type === "pourcent" ? `−${nb(o.pourcent)} %` : `${Number(o.achetes) || 3}+${Number(o.offerts) || 1}`;
+  const offresDe = (p) => offresActives().filter((o) => OFF.cible(o, p));
+  const nomCat = (id) => { const c = (data.categories || []).find((x) => String(x.id) === String(id)); return c ? window.I18N.c(c, "nom") : ""; };
   const seuilOffert = () => Number(((data && data.parametres) || {}).livraison_offerte_des || 0);
   // La livraison est facturée à la réception selon la distance : jamais ajoutée au total du site
   const fraisLivraison = () => 0;
@@ -255,6 +265,22 @@
   const nb = (n) => Number(n || 0).toLocaleString(L.locale(), { maximumFractionDigits: 2 });
   const livraisonTexte = () => livraisonOfferte() ? t("free_delivery") : t("delivery_range", { min: nb(data.parametres.livraison_min ?? 10), max: money(data.parametres.livraison_max ?? 25) });
   // Suggestions « Complétez votre commande » : complément de format, pièce du jour, autres catégories à petit prix, rareté
+  // Bloc offres du panier : pièces offertes / remise en %, et coup de pouce « ajoutez-en 1, il est offert »
+  function offresHtml(lines) {
+    const info = remiseInfo();
+    const rows = [];
+    info.details.forEach((d) => d.lignes.forEach((l) => rows.push(l.offert
+      ? `<div class="offer-row"><span><b>${esc(offreCourte(d.offre))}</b> · ${esc(t("offer_free_line", { n: l.offert, name: nomP(l.p) }))}</span><span class="num">−${esc(money(l.remise))}</span></div>`
+      : `<div class="offer-row"><span><b>${esc(offreCourte(d.offre))}</b> · ${esc(nomP(l.p))}</span><span class="num">−${esc(money(l.remise))}</span></div>`)));
+    const nudges = [];
+    offresActives().forEach((o) => {
+      if (o.type === "pourcent") return;
+      const m = OFF.manque(lines.filter((l) => !isSupp(l.p)), o);
+      if (m === 0) { const cible = o.produit_id ? nomP(produit(o.produit_id) || {}) : nomCat(o.categorie_id); if (cible) nudges.push(`<div class="offer-nudge">${esc(t("offer_nudge", { cat: cible }))}</div>`); }
+    });
+    if (!rows.length && !nudges.length) return "";
+    return `<div class="offers">${rows.join("")}${rows.length ? `<div class="offer-total"><span>${esc(t("offer_total"))}</span><span class="num">−${esc(money(info.remise))}</span></div>` : ""}${nudges.join("")}</div>`;
+  }
   function suggestionsHtml(lines, mode) {
     lines = lines.filter((l) => !isSupp(l.p));
     if (!lines.length || lines.length >= 4) return "";
@@ -268,6 +294,8 @@
       const cand = pool.filter((p) => p.prix >= reste && p.prix > 5).sort((a, b) => a.prix - b.prix)[0];
       if (cand) push(cand, t("why_free_delivery"));
     }
+    // 2b. Une pièce de plus et elle est offerte
+    offresActives().filter((o) => o.type !== "pourcent" && OFF.manque(lines, o) === 0).forEach((o) => { const cand = pool.filter((p) => OFF.cible(o, p)).sort((a, b) => b.prix - a.prix)[0]; if (cand) push(cand, t("why_offer")); });
     // 3. Deuxième parfum dans la même catégorie (verrines, beignets, cookies)
     lines.filter((l) => l.p.suivre_stock).forEach((l) => { const autre = pool.filter((p) => p.categorie_id === l.p.categorie_id && p.prix > 5).sort((a, b) => b.prix - a.prix)[0]; if (autre) push(autre, t("why_second")); });
     // 4. Pièce du jour
@@ -379,6 +407,7 @@
         ${suppFor(l.p).map((sp) => cart[sp.id]
           ? `<div class="line-sub"><span>${esc(t("supp_line", { name: nomP(sp) }))} <small>${esc(money(sp.prix))} × ${cart[sp.id]}</small></span><span class="num">${esc(money(sp.prix * cart[sp.id]))}</span><button class="remove" data-remove="${sp.id}" aria-label="${esc(t("remove"))}" title="${esc(t("remove"))}">${ICON.trash}</button></div>`
           : `<button class="supp-add" data-supp="${sp.id}" data-parent="${l.p.id}">${esc(t("supp_add", { name: nomP(sp), price: money(sp.prix) }))}</button>`).join("")}`).join("")}</div>
+      ${offresHtml(lines)}
       ${mode === "livraison" && p.livraison_active ? `<div class="summary"><div class="row"><span>${ICON.bike}</span><span>${esc(livraisonTexte())}</span></div>${seuilOffert() > 0 && !livraisonOfferte() ? `<div class="progress"><div class="bar"><span style="width:${Math.round(sousTotal() / seuilOffert() * 100)}%"></span></div><small>${esc(t("free_delivery_left", { amount: money(seuilOffert() - sousTotal()) }))}</small></div>` : ""}</div>` : ""}
       ${suggestionsHtml(lines, mode)}
 
@@ -447,9 +476,6 @@
     const bad = (el) => { el.closest(".field")?.classList.add("err"); el.setAttribute("aria-invalid", "true"); el.focus(); };
     if (!nom) return toast(t("err_name"), true), bad(f.nom);
     if (!mode) return toast(t("choose_mode"), true);
-    // Offre cookies 3+1 appliquée automatiquement (le pâtissier ajoute la 4e pièce, non facturée)
-    const catCookies = data.categories.find((x) => /cookie/i.test(x.nom));
-    if (catCookies && cartLines().filter((l) => l.p.categorie_id === catCookies.id).reduce((s0, l) => s0 + l.qte, 0) >= 3 && (data.bannieres || []).some((b) => b.actif && /cookie/i.test(b.titre + b.texte))) remarque = [t("offer_cookies"), remarque].filter(Boolean).join(" · ");
     if (tel.length < 8) return toast(t("err_phone"), true), bad(f.tel);
     if (mode === "livraison" && !gps && !adresse) {
       // Ni position ni adresse : on demande la position maintenant et on enchaîne tout seul
@@ -511,21 +537,45 @@
     const fmt = (n) => `${Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} DH`;
     const ref = cf.code || cf.numero;
     const dateFr = cf.date ? new Date(cf.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : "aujourd'hui";
-    const langue = L.LANGS[L.lang] ? L.LANGS[L.lang].nom : L.lang;
-    const ligneMode = cf.mode !== "livraison" ? `À emporter - retrait en boutique` : cf.client.gps_lat ? `Livraison - position GPS : ${mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng })}` : `Livraison`;
+    const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+    const creneau = (() => { const c = CRENEAU_FR[cf.creneau] || CRENEAU_FR.asap; const m = c.match(/\((.*)\)$/); return m ? m[1] : c.toLowerCase(); })();
+    const livraison = cf.mode === "livraison";
+    const langues = { ar: "arabe", en: "anglais", de: "allemand", nl: "néerlandais" };
+    const arts = cf.articles || [];
+    const pieces = arts.reduce((n, l) => n + Number(l.qte || 0), 0);
+    const brut = arts.reduce((n, l) => n + Number(l.prix) * Number(l.qte), 0);
+    const remise = Number(cf.remise || 0);
+    const lignes = [];
+    arts.forEach((l) => {
+      const supp = produit(l.produit_id)?.supplement ? "  + " : "- ";
+      const off = Number(l.offert || 0), payes = Number(l.qte) - off, rem = Number(l.remise || 0);
+      if (payes > 0) lignes.push(`${supp}${payes} x ${l.nom} = ${fmt(l.prix * payes - (off ? 0 : rem))}${!off && rem ? ` (remise ${fmt(rem)})` : ""}`);
+      if (off > 0) lignes.push(`${supp}${off} x ${l.nom} = OFFERT`);
+    });
+    const offert = seuilOffert() > 0 && cf.total >= seuilOffert();
+    const detail = [`articles ${fmt(brut)}`, remise ? `remise ${fmt(remise)}` : null, livraison ? (offert ? "livraison offerte" : `livraison ${Number(data.parametres.livraison_min ?? 10)} à ${fmt(data.parametres.livraison_max ?? 25)} selon distance`) : null].filter(Boolean).join(", ");
+    const adresse = (cf.client.adresse || "").trim();
     return [
-      `*Commande n° ${ref} - ${shopName()}*`,
-      `Pour : ${dateFr}, ${(CRENEAU_FR[cf.creneau] || CRENEAU_FR.asap).toLowerCase()}`,
-      ligneMode,
-      cf.mode === "livraison" && cf.client.adresse ? `Adresse / complément : ${cf.client.adresse}` : null,
-      `Client : ${cf.client.client_nom} - ${cf.client.client_tel}${L.lang !== "fr" ? ` (langue : ${langue})` : ""}`,
+      `*COMMANDE ${ref} · ${livraison ? "LIVRAISON" : "RETRAIT BOUTIQUE"}*`,
+      `*${cap(dateFr)}, ${creneau}*`,
       ``,
-      cf.articles.map((l) => `${produit(l.produit_id)?.supplement ? "   + " : ""}${l.qte} x ${l.nom} - ${fmt(l.prix * l.qte)}`).join("\n"),
-      cf.mode === "livraison" ? ((seuilOffert() > 0 && cf.total >= seuilOffert()) ? `Livraison offerte` : `Livraison : ${Number(data.parametres.livraison_min ?? 10)} à ${fmt(data.parametres.livraison_max ?? 25)} selon la distance, à confirmer`) : null,
-      `*Total articles : ${fmt(cf.total)}*${cf.mode === "livraison" ? " + livraison" : ""}, à régler à la réception`,
-      cf.remarque ? `\nRemarque : ${cf.remarque}` : null,
+      `À PRÉPARER : *${pieces} pièce${pieces > 1 ? "s" : ""}*`,
+      ...lignes,
+      cf.remarque ? `\nREMARQUE CLIENT :\n${cf.remarque}` : null,
       ``,
-      `Stock réservé. Fiche : ${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${ref}`,
+      `À ENCAISSER : *${fmt(cf.total)}${livraison && !offert ? " + livraison" : ""}*`,
+      `(${detail})`,
+      livraison ? `\nLIVRER À :` : null,
+      livraison && cf.client.gps_lat ? mapsUrl({ lat: cf.client.gps_lat, lng: cf.client.gps_lng }) : null,
+      livraison && adresse ? adresse : null,
+      livraison && !cf.client.gps_lat && !adresse ? "(position à demander au client)" : null,
+      ``,
+      `CLIENT : ${cf.client.client_nom}`,
+      `${cf.client.client_tel}`,
+      L.lang !== "fr" ? `Répondre en : ${langues[L.lang] || L.lang}` : null,
+      ``,
+      `Stock réservé. Fiche admin :`,
+      `${location.origin}${location.pathname.replace(/[^/]*$/, "")}admin.html#cmd=${ref}`,
     ].filter((x) => x !== null).join("\n");
   }
 
@@ -540,7 +590,7 @@
         <h3>${esc(t("stock_reserved_a"))} <em>${esc(t("stock_reserved_b"))}</em></h3>
         <p>${esc(t("confirm_text", { shop: shopName() }))}</p>
         ${L.lang !== "fr" ? `<p><small>${esc(t("confirm_lang_note"))}</small></p>` : ""}
-        <div class="recap" dir="ltr">${esc(msg.split("\n").filter((l) => !l.startsWith("Stock réservé")).join("\n")).replace(/\*/g, "")}</div>
+        <div class="recap" dir="ltr">${esc(msg.split("\n").filter((l) => !l.startsWith("Stock réservé") && !l.includes("admin.html#cmd=")).join("\n")).replace(/\*/g, "")}</div>
         <div class="grazie">${esc(t("grazie"))}</div>
       </div>`;
     $("#drawerFoot").innerHTML = `

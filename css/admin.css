@@ -176,3 +176,6 @@ body { background: var(--cream); }
   .topbar .title { font-size: 15px; white-space: nowrap; }
   .topbar a, .topbar button.linkish { white-space: nowrap; padding: 6px 9px; font-size: 12px; }
 }
+
+.order-lines .offert { color: var(--good, #2e7d4f); font-weight: 600; }
+.pill-ok { background: #e3f2e8; color: #2e7d4f; }

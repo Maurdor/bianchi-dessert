@@ -33,6 +33,7 @@
     if (d.parametres && !d.parametres.traductions && TR.parametres) d.parametres.traductions = clone(TR.parametres);
     // Nouveaux paramètres ajoutés après une première utilisation de la démo : valeurs par défaut
     d.parametres = { ...clone(window.BIANCHI_DEMO.parametres), ...(d.parametres || {}) };
+    if (!Array.isArray(d.offres)) d.offres = clone(window.BIANCHI_DEMO.offres || []);
     return d;
   }
   function saveLocal(d) {
@@ -53,7 +54,7 @@
     mode: "demo",
     async getCatalogue() {
       const d = loadLocal();
-      return { categories: d.categories, produits: d.produits, bannieres: d.bannieres, parametres: d.parametres };
+      return { categories: d.categories, produits: d.produits, bannieres: d.bannieres, offres: d.offres || [], parametres: d.parametres };
     },
     // Meilleure vente sur 30 jours (au moins 3 pièces), hors pièce du jour et suppléments
     async getBestSeller() {
@@ -83,16 +84,21 @@
         const p = d.produits.find((x) => x.id === l.produit_id);
         if (p.suivre_stock) p.stock = (p.stock || 0) - l.qte;
       }
+      // Offres (même règle que la fonction SQL) : pièces offertes et remise
+      const off = window.BIANCHI_OFFRES ? window.BIANCHI_OFFRES.calc(lignes.map((l) => ({ p: d.produits.find((x) => x.id === l.produit_id), qte: l.qte })), d.offres || []) : { remise: 0, par: {} };
+      lignes.forEach((l) => { const e = off.par[l.produit_id]; l.offert = e ? e.offert : 0; l.remise = e ? e.remise : 0; });
+      const remise = off.remise || 0;
+      total = Math.round((total - remise) * 100) / 100;
       // Livraison facturée à la réception selon la distance : jamais ajoutée au total
       const numero = (d.commandes.reduce((m, c) => Math.max(m, c.numero || 0), 0) || 0) + 1;
       const code = codeCommande(d.commandes);
       const commande = {
-        id: uid(), numero, code, ...client, articles: lignes, total, statut: "en_attente", whatsapp_envoye: false,
+        id: uid(), numero, code, ...client, articles: lignes, total, remise, statut: "en_attente", whatsapp_envoye: false,
         created_at: new Date().toISOString(),
       };
       d.commandes.unshift(commande);
       saveLocal(d);
-      return { id: commande.id, numero, code, total, articles: lignes };
+      return { id: commande.id, numero, code, total, remise, articles: lignes };
     },
 
     async marquerEnvoyee(id) { const d = loadLocal(); const cmd = d.commandes.find((x) => x.id === id); if (cmd) { cmd.whatsapp_envoye = true; saveLocal(d); } },
@@ -141,6 +147,13 @@
       saveLocal(d);
     },
     async deleteBanniere(id) { const d = loadLocal(); d.bannieres = d.bannieres.filter((x) => x.id !== id); saveLocal(d); },
+    async upsertOffre(o) {
+      const d = loadLocal(); d.offres = d.offres || [];
+      const i = d.offres.findIndex((x) => x.id === o.id);
+      if (i >= 0) d.offres[i] = { ...d.offres[i], ...o }; else d.offres.push({ ...o, id: o.id || uid() });
+      saveLocal(d);
+    },
+    async deleteOffre(id) { const d = loadLocal(); d.offres = (d.offres || []).filter((x) => x.id !== id); saveLocal(d); },
     async saveParametres(p) { const d = loadLocal(); d.parametres = { ...d.parametres, ...p, id: 1 }; saveLocal(d); },
     async getCommandes() { return loadLocal().commandes; },
     async changerStatut(id, statut) {
@@ -179,13 +192,14 @@
       mode: "supabase",
       client: sb,
       async getCatalogue() {
-        const [categories, produits, bannieres, parametres] = await Promise.all([
+        const [categories, produits, bannieres, parametres, offres] = await Promise.all([
           sb.from("categories").select("*").order("ordre").then(check),
           sb.from("produits").select("*").order("ordre").then(check),
           sb.from("bannieres").select("*").order("ordre").then(check),
           sb.from("parametres").select("*").eq("id", 1).maybeSingle().then(check),
+          sb.from("offres").select("*").order("ordre").then(check).catch(() => []),
         ]);
-        return { categories, produits, bannieres, parametres: parametres || {} };
+        return { categories, produits, bannieres, offres: offres || [], parametres: parametres || {} };
       },
       async getBestSeller() { const { data, error } = await sb.rpc("best_seller"); if (error) return null; return data && data[0] ? data[0].produit_id : null; },
       onChange(cb) {
@@ -194,6 +208,7 @@
           .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, cb)
           .on("postgres_changes", { event: "*", schema: "public", table: "bannieres" }, cb)
           .on("postgres_changes", { event: "*", schema: "public", table: "parametres" }, cb)
+          .on("postgres_changes", { event: "*", schema: "public", table: "offres" }, cb)
           .subscribe();
         // Sécurité : si le temps réel n'est pas activé, on rafraîchit au retour sur l'onglet
         const onFocus = () => { if (document.visibilityState === "visible") cb(); };
@@ -227,6 +242,8 @@
       async deleteCategorie(id) { check(await sb.from("categories").delete().eq("id", id)); },
       async upsertBanniere(b) { const row = { ...b }; if (!row.id) delete row.id; check(await sb.from("bannieres").upsert(row)); },
       async deleteBanniere(id) { check(await sb.from("bannieres").delete().eq("id", id)); },
+      async upsertOffre(o) { const row = { ...o }; if (!row.id) delete row.id; check(await sb.from("offres").upsert(row)); },
+      async deleteOffre(id) { check(await sb.from("offres").delete().eq("id", id)); },
       async saveParametres(p) { check(await sb.from("parametres").upsert({ ...p, id: 1 })); },
       async getCommandes() { return check(await sb.from("commandes").select("*").order("created_at", { ascending: false }).limit(300)); },
       async changerStatut(id, statut) { const { error } = await sb.rpc("changer_statut", { p_id: id, p_statut: statut }); if (error) throw new Error(error.message); },

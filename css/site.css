@@ -511,3 +511,10 @@ html { overflow-x: clip; }
 .cart-fab .fab-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; line-height: 1.15; text-align: start; }
 .cart-fab .fab-sub { font-size: 11.5px; font-weight: 600; opacity: .8; }
 .cart-fab .fab-sub[hidden] { display: none; }
+
+/* Offres dans le panier : lignes de pièces offertes / remise, total de remise, coup de pouce */
+.offers { margin: 4px 0 8px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2, rgba(139,110,56,.08)); font-size: 13px; }
+.offer-row, .offer-total { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; }
+.offer-row .num, .offer-total .num { color: var(--good); font-weight: 700; }
+.offer-total { border-top: 1px solid var(--line-soft); margin-top: 4px; padding-top: 6px; font-weight: 700; }
+.offer-nudge { margin-top: 4px; font-weight: 700; color: var(--gold-deep); }

@@ -1,7 +1,7 @@
 // Données de démonstration : le catalogue réel de Bianchi au 14/09/2026.
 // En production ces données vivent dans Supabase (voir supabase/schema.sql).
 window.BIANCHI_DEMO = {
-  version: 11,
+  version: 12,
   parametres: {
     id: 1,
     nom: "Bianchi Dessert",
@@ -66,6 +66,9 @@ window.BIANCHI_DEMO = {
     { id: "p28", categorie_id: 6, nom: "Cookie glacé vanille caramel — Grand", description: "Grand cookie garni de glace vanille et caramel.", prix: 28, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/cookie-glace-grand.jpg", allergenes: "Gluten, œufs, lait, soja", actif: true, ordre: 6 },
     { id: "p29", categorie_id: 7, nom: "Jus d'orange pressé maison", description: "Oranges pressées à la demande, sans sucre ajouté.", prix: 15, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/jus-orange.jpg", actif: true, ordre: 1 },
     { id: "p30", categorie_id: 7, nom: "Mojito menthe glacé", description: "Menthe fraîche, citron pressé, glace pilée. Sans alcool.", prix: 20, ancien_prix: null, promo_label: "", stock: null, suivre_stock: false, image_url: "assets/produits/mojito-menthe.jpg", actif: true, ordre: 2 },
+  ],
+  offres: [
+    { id: "offre-cookies", type: "n_plus_1", categorie_id: 3, produit_id: null, achetes: 3, offerts: 1, pourcent: null, actif: true, ordre: 1 },
   ],
   bannieres: [
     { id: "b1", titre: "Offre cookies : 3 achetés, le 4ᵉ offert", texte: "Ajoutée automatiquement à votre commande dès 3 cookies.", icone: "4ᵉ", style: "or", actif: true, ordre: 1 },

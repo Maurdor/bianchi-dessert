@@ -198,7 +198,7 @@
       <div class="order-head"><b>Commande n° ${esc(ref)}</b><span class="when">${d.toLocaleDateString("fr-FR")} ${d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>${nonEnvoye ? `<span class="pill pill-warn" title="Le client n'a pas ouvert WhatsApp avec le récapitulatif">Récap non envoyé</span>` : ""}<span class="spacer"></span>
         <select data-cmd="${c.id}" class="st-${esc(c.statut)}">${Object.entries(STATUTS).map(([k, l]) => `<option value="${k}"${c.statut === k ? " selected" : ""}>${l}</option>`).join("")}</select></div>
       <div class="order-client"><span>👤 <b>${esc(c.client_nom)}</b></span>${c.langue && c.langue !== "fr" ? `<span title="Langue du client">🌐 ${esc(({ ar: "arabe", en: "anglais", de: "allemand", nl: "néerlandais" })[c.langue] || c.langue)}</span>` : ""}<a href="https://wa.me/${tel}" target="_blank" rel="noopener">💬 ${esc(c.client_tel)}</a><span>${c.mode === "livraison" ? "🛵 Livraison" + (c.adresse ? " : " + esc(c.adresse) : "") : "🛍️ À emporter"}</span>${c.mode === "livraison" && c.gps_lat ? `<a href="https://maps.google.com/?q=${Number(c.gps_lat).toFixed(6)},${Number(c.gps_lng).toFixed(6)}" target="_blank" rel="noopener">📍 Ouvrir la position GPS</a>` : ""}${dateS || cren ? `<span>📅 ${esc([dateS, cren].filter(Boolean).join(" · "))}</span>` : ""}</div>
-      <div class="order-lines">${arts.map((l) => `<div><span>${l.qte}× ${esc(l.nom)}</span><span class="num">${dhTxt(l.prix * l.qte)}</span></div>`).join("")}<div class="tot"><span>Total</span><span class="num">${dhTxt(c.total)}</span></div></div>
+      <div class="order-lines">${arts.map((l) => { const off = Number(l.offert || 0), rem = Number(l.remise || 0), payes = l.qte - off; return `${payes > 0 ? `<div><span>${payes}× ${esc(l.nom)}${!off && rem ? ` <small>(remise ${dhTxt(rem)})</small>` : ""}</span><span class="num">${dhTxt(l.prix * payes - (off ? 0 : rem))}</span></div>` : ""}${off > 0 ? `<div class="offert"><span>${off}× ${esc(l.nom)} <b>OFFERT</b></span><span class="num">0 DH</span></div>` : ""}`; }).join("")}${Number(c.remise) ? `<div><span>Remise offres</span><span class="num">−${dhTxt(c.remise)}</span></div>` : ""}<div class="tot"><span>À encaisser${c.mode === "livraison" ? " + livraison" : ""}</span><span class="num">${dhTxt(c.total)}</span></div></div>
       ${c.remarque ? `<div style="font-size:13px">📝 ${esc(c.remarque)}</div>` : ""}
       ${actions ? `<div class="order-actions">${actions}</div>` : ""}
     </div>`;
@@ -374,8 +374,15 @@
     const p = data.parametres;
     const bs = [...data.bannieres].sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
     page.innerHTML = `
-      <div class="page-head"><div><h2>Promotions</h2><p>Bannières en haut du site.</p></div>
-        <div class="page-actions"><button class="btn btn-ink btn-sm" id="addBan">+ Bannière</button></div></div>
+      <div class="page-head"><div><h2>Promotions</h2><p>Offres appliquées automatiquement au panier (prix, message WhatsApp, fiche commande) et bannières en haut du site.</p></div>
+        <div class="page-actions"><button class="btn btn-ghost btn-sm" id="addOffre">+ Offre</button><button class="btn btn-ink btn-sm" id="addBan">+ Bannière</button></div></div>
+      <h3 style="font-size:22px;margin:6px 0 10px">Offres</h3>
+      <div class="list" style="margin-bottom:22px">${(data.offres || []).slice().sort((a, b) => (a.ordre || 0) - (b.ordre || 0)).map((o) => `
+        <div class="item${o.actif === false ? " inactif" : ""}">
+          <div class="item-thumb" style="font-size:22px">${o.type === "pourcent" ? "%" : "+1"}</div>
+          <div class="item-main"><b>${esc(offreTitre(o))}</b><small>${esc(offreCible(o))}</small><div class="pills">${o.actif === false ? `<span class="pill pill-line">Inactive</span>` : `<span class="pill pill-ok">Active</span>`}</div></div>
+          <div class="item-actions"><button class="icon-btn" data-otoggle="${o.id}" title="${o.actif === false ? "Activer" : "Désactiver"}">${o.actif === false ? "🙈" : "👁️"}</button><button class="icon-btn" data-oedit="${o.id}">✏️</button><button class="icon-btn danger" data-odel="${o.id}">🗑️</button></div>
+        </div>`).join("") || `<p class="empty">Aucune offre. Exemple : « 3 cookies achetés, le 4ᵉ offert » ou « −20 % sur les beignets ».</p>`}</div>
       <h3 style="font-size:22px;margin:6px 0 10px">Bannières</h3>
       <div class="list">${bs.map((b) => `
         <div class="item${b.actif === false ? " inactif" : ""}">
@@ -383,9 +390,59 @@
           <div class="item-actions"><button class="icon-btn" data-btoggle="${b.id}" title="${b.actif === false ? "Activer" : "Désactiver"}">${b.actif === false ? "🙈" : "👁️"}</button><button class="icon-btn" data-bedit="${b.id}">✏️</button><button class="icon-btn danger" data-bdel="${b.id}">🗑️</button></div>
         </div>`).join("") || `<p class="empty">Aucune bannière. Créez-en une pour mettre une offre en avant.</p>`}</div>`;
     $("#addBan").onclick = () => formBanniere({});
+    $("#addOffre").onclick = () => formOffre({});
+    page.querySelectorAll("[data-oedit]").forEach((b) => b.onclick = () => formOffre((data.offres || []).find((x) => x.id === b.dataset.oedit)));
+    page.querySelectorAll("[data-odel]").forEach((b) => b.onclick = async () => { if (!confirm("Supprimer cette offre ?")) return; await api.deleteOffre(b.dataset.odel); toast("Offre supprimée"); recharger(); });
+    page.querySelectorAll("[data-otoggle]").forEach((b) => b.onclick = async () => { const x = (data.offres || []).find((y) => y.id === b.dataset.otoggle); await api.upsertOffre({ ...x, actif: x.actif === false }); recharger(); });
     page.querySelectorAll("[data-bedit]").forEach((b) => b.onclick = () => formBanniere(data.bannieres.find((x) => x.id === b.dataset.bedit)));
     page.querySelectorAll("[data-bdel]").forEach((b) => b.onclick = async () => { if (!confirm("Supprimer cette bannière ?")) return; await api.deleteBanniere(b.dataset.bdel); toast("Bannière supprimée"); recharger(); });
     page.querySelectorAll("[data-btoggle]").forEach((b) => b.onclick = async () => { const x = data.bannieres.find((y) => y.id === b.dataset.btoggle); await api.upsertBanniere({ ...x, actif: x.actif === false }); recharger(); });
+  }
+  // ---------- OFFRES ----------
+  function offreCible(o) {
+    if (o.produit_id) { const p = data.produits.find((x) => x.id === o.produit_id); return p ? `Produit : ${p.nom}` : "Produit supprimé"; }
+    const c = data.categories.find((x) => String(x.id) === String(o.categorie_id)); return c ? `Catégorie : ${c.nom}` : "Toute la carte ? (cible manquante)";
+  }
+  function offreTitre(o) {
+    if (o.type === "pourcent") return `−${Number(o.pourcent) || 0} %`;
+    const a = Number(o.achetes) || 3, f = Number(o.offerts) || 1;
+    return f === 1 ? `${a} achetés, le ${a + 1}ᵉ offert (le moins cher)` : `${a} achetés, ${f} offerts (les moins chers)`;
+  }
+  function formOffre(o) {
+    const cibleVal = o.produit_id ? `p:${o.produit_id}` : o.categorie_id != null ? `c:${o.categorie_id}` : "";
+    openModal(`
+      <h3>${o.id ? "Modifier l'offre" : "Nouvelle offre"}</h3>
+      <form id="fo" class="panel" style="box-shadow:none;padding:0;margin:0">
+        <div class="field"><label>Type d'offre</label><select name="type">
+          <option value="n_plus_1"${o.type !== "pourcent" ? " selected" : ""}>N achetés, M offerts (les moins chers)</option>
+          <option value="pourcent"${o.type === "pourcent" ? " selected" : ""}>Remise en pourcentage</option></select></div>
+        <div class="field"><label>S'applique à <span class="req">*</span></label><select name="cible" required>
+          <option value="">— Choisir —</option>
+          <optgroup label="Catégories">${cats().map((c) => `<option value="c:${c.id}"${cibleVal === `c:${c.id}` ? " selected" : ""}>${esc(c.nom)}</option>`).join("")}</optgroup>
+          <optgroup label="Produits">${data.produits.slice().sort((a, b) => a.nom.localeCompare(b.nom)).map((p) => `<option value="p:${p.id}"${cibleVal === `p:${p.id}` ? " selected" : ""}>${esc(p.nom)}</option>`).join("")}</optgroup></select></div>
+        <div class="row2" id="foN"${o.type === "pourcent" ? " hidden" : ""}>
+          <div class="field"><label>Achetés</label><input name="achetes" type="number" min="1" value="${o.achetes ?? 3}"></div>
+          <div class="field"><label>Offerts</label><input name="offerts" type="number" min="1" value="${o.offerts ?? 1}"></div>
+        </div>
+        <div class="field" id="foP"${o.type === "pourcent" ? "" : " hidden"}><label>Remise (%)</label><input name="pourcent" type="number" min="1" max="90" step="1" value="${o.pourcent ?? 20}"></div>
+        <p class="hint" style="font-size:12.5px;color:var(--muted);margin:0 0 10px">Le site affiche l'offre sur les produits concernés, l'applique dans le panier (pièces les moins chères offertes, ou remise), l'écrit dans le message WhatsApp et sur la fiche commande. Rien à faire côté caisse.</p>
+        <label class="switch"><div><b>Active</b></div><input type="checkbox" name="actif"${o.actif !== false ? " checked" : ""}><span class="sw"></span></label>
+        <div class="form-actions"><button type="button" class="btn btn-ghost" id="annuler">Annuler</button><button class="btn btn-ink" type="submit">Enregistrer</button></div>
+      </form>`);
+    const f = $("#fo");
+    f.type.onchange = () => { $("#foN").hidden = f.type.value === "pourcent"; $("#foP").hidden = f.type.value !== "pourcent"; };
+    $("#annuler").onclick = closeModal;
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const [k, v] = (f.cible.value || ":").split(":");
+      if (!v) return toast("Choisissez une catégorie ou un produit", true);
+      const row = { id: o.id, type: f.type.value, categorie_id: k === "c" ? Number(v) : null, produit_id: k === "p" ? v : null,
+        achetes: Math.max(1, Number(f.achetes.value) || 3), offerts: Math.max(1, Number(f.offerts.value) || 1),
+        pourcent: f.type.value === "pourcent" ? Math.min(90, Math.max(1, Number(f.pourcent.value) || 0)) : null,
+        actif: f.actif.checked, ordre: o.ordre ?? ((data.offres || []).length + 1) };
+      if (row.type === "pourcent" && !row.pourcent) return toast("Indiquez un pourcentage", true);
+      try { await api.upsertOffre(row); toast("Offre enregistrée"); closeModal(); recharger(); } catch (err) { toast(err.message, true); }
+    };
   }
   function formBanniere(b) {
     openModal(`
