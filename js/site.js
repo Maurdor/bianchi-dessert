@@ -166,7 +166,7 @@
     sections.forEach((s) => { s.avail = s.produits.filter(dispo); s.sold = s.produits.filter((p) => !dispo(p)); });
     sections.sort((a, b) => (b.avail.length ? 1 : 0) - (a.avail.length ? 1 : 0));
     const navHtml = sections.filter((s) => s.avail.length && !(s.avail.length === 1 && s.avail[0] === vedette && !s.sold.length)).map((s, i) => `<a href="#${s.id}" data-target="${s.id}"${i === 0 ? ' class="active"' : ""}>${esc(s.nom)}</a>`).join("");
-    $("#catnav").innerHTML = `<a href="#vitrine" data-target="vitrine" class="active">${esc(t("all"))}</a>` + navHtml.replace(' class="active"', "");
+    $("#catnav").innerHTML = `<a href="#vitrine" data-target="vitrine" class="active">${esc(t("all"))}</a>` + (vedette ? `<a href="#top" data-target="top">${esc(t("nav_showcase"))}</a>` : "") + navHtml.replace(' class="active"', "");
 
     const main = $("#catalogue");
     if (!sections.length) { main.innerHTML = `<p class="empty">${q ? esc(t("no_match", { q: recherche })) : esc(t("catalogue_soon"))}</p>`; return; }
@@ -653,7 +653,7 @@
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"), nav = $("#catnav"); if (a && nav && (a.offsetLeft < nav.scrollLeft || a.offsetLeft + a.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollTo({ left: Math.max(0, a.offsetLeft - 20), behavior: "smooth" }); } });
   }, { rootMargin: "-90px 0px -70% 0px" });
-  const observeSections = () => $$(".section").forEach((s) => io.observe(s));
+  const observeSections = () => $$("#top, .section").forEach((s) => io.observe(s));
 
   function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); }
 
