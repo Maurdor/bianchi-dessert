@@ -248,7 +248,7 @@
   }
   const cartLines = () => Object.entries(cart).map(([id, qte]) => ({ p: produit(id), qte })).filter((l) => l.p);
   const sousTotal = () => cartLines().reduce((s, l) => s + l.p.prix * l.qte, 0);
-  const seuilOffert = () => Number(data.parametres.livraison_offerte_des || 0);
+  const seuilOffert = () => Number(((data && data.parametres) || {}).livraison_offerte_des || 0);
   // La livraison est facturée à la réception selon la distance : jamais ajoutée au total du site
   const fraisLivraison = () => 0;
   const livraisonOfferte = () => seuilOffert() > 0 && sousTotal() >= seuilOffert();
@@ -655,7 +655,7 @@
   }, { rootMargin: "-90px 0px -70% 0px" });
   const observeSections = () => $$("#top, .section").forEach((s) => io.observe(s));
 
-  function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); }
+  function renderAll() { [renderInfos, renderAllerg, renderCatalogue, refreshCartUI, observeSections, renderPending].forEach((f) => { try { f(); } catch (e) { console.error("Rendu :", f.name, e); } }); }
 
   // ---------- Chargement ----------
   async function recharger() {
