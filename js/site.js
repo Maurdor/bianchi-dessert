@@ -78,8 +78,8 @@
     if (bestSellerId && p.id === bestSellerId) out.push(TR.promo_labels?.["Best-seller"]?.[L.lang] || "Best-seller");
     return out;
   };
-  const badgesHtml = (p) => { const ls = labelsDe(p); return ls.length ? `<div class="card-tabs">${ls.map((l) => `<span class="promo">${esc(l)}</span>`).join("")}</div>` : ""; };
-  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><span class="emoji">${emojiDe(p)}</span></div>`}${sansTag ? "" : `<span class="tag tag-${stockKind(p)}">${esc(stockTxt(p))}</span>`}${extra}</div>`;
+  const badgesHtml = (p) => { const ls = p.vedette ? [] : labelsDe(p); return ls.length ? `<div class="badges">${ls.map((l) => `<span class="badge badge-promo">${esc(l)}</span>`).join("")}</div>` : ""; };
+  const photoHtml = (p, extra = "", sansTag = false) => `<div class="photo${dispo(p) ? "" : " soldout"}" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}" loading="lazy">` : `<div class="ph"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 16 0v2H4V9ZM3 11h18M5 14h14l-1 6H6l-1-6Z"/></svg><span>${esc(t("photo_soon"))}</span></div>`}${!dispo(p) ? `<span class="badge badge-out">${esc(t("out_today"))}</span>` : badgesHtml(p)}${extra}</div>`;
 
   // ---------- Textes statiques ----------
   function applyStatic() {
@@ -94,9 +94,7 @@
       sel.value = L.lang;
       sel.setAttribute("aria-label", t("language"));
     });
-    $("#tagline").textContent = `${t("tagline")}${data.parametres.adresse ? " · " + c(data.parametres, "adresse") : ""}`;
-    $("#dateDesk").textContent = `${t("batch_of_day")} · ${L.date(new Date())}`;
-    $("#dateMob").textContent = `${t("batch_of_day")} · ${L.date(new Date())}`;
+    $("#dateDesk").innerHTML = `<span class="m1">${esc(t("batch_of_day"))} ·</span> <span class="m2">${esc(L.date(new Date()))}</span>`;
   }
 
   // ---------- Infos boutique ----------
@@ -105,25 +103,28 @@
     document.title = shopName();
     $("#slogan").textContent = p.slogan || "";
     $("#shopName").textContent = shopName();
-    $("#statusDesk").textContent = ouvert() ? t("orders_open") : t("orders_closed");
-    $("#dotDesk").classList.toggle("ferme", !ouvert());
+    const hFin = (String(c(p, "horaires") || "").match(/–\s*([0-9]{1,2}h[0-9]{0,2})\s*$/) || [])[1];
+    const statusTxt = ouvert() ? (hFin ? t("open_until", { h: hFin }) : t("orders_open")) : t("closed_short");
+    $("#statusDesk").textContent = statusTxt; $("#statusMobTxt").textContent = statusTxt;
+    $$("#statusPill, #statusMob").forEach((el) => el.classList.toggle("ferme", !ouvert()));
     const wa = "https://wa.me/" + String(p.whatsapp || "").replace(/\D/g, "");
     $("#btnWaTop").href = wa; $("#btnWaTop").hidden = !p.whatsapp; $("#btnWaDesk").href = wa; $("#btnWaDesk").hidden = !p.whatsapp;
     const closed = $("#closedBanner"); closed.hidden = ouvert(); $("#closedMsg").textContent = c(p, "message_ferme") || "";
 
     const maps = p.lien_maps || (p.adresse ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.adresse + " " + shopName()) : "");
-    const infos = [
-      p.adresse ? `<li>${ICON.pin}<a href="${esc(maps)}" target="_blank" rel="noopener">${esc(c(p, "adresse"))} · ${esc(t("directions"))}</a></li>` : "",
-      c(p, "horaires") ? `<li>${ICON.clock}<span>${esc(c(p, "horaires"))}</span></li>` : "",
-      p.livraison_active ? `<li>${ICON.bike}<span>${esc(t("delivery_info", { min: nb(p.livraison_min ?? 10), max: money(p.livraison_max ?? 25) }))}${seuilOffert() ? " · " + esc(t("free_delivery")) + " ≥ " + esc(money(seuilOffert())) : ""}${c(p, "delai_texte") ? " · " + esc(c(p, "delai_texte")) : ""}</span></li>` : "",
-    ].join("");
-    $("#infosDesk").innerHTML = infos;
-    $("#footInfo").innerHTML = infos + `<li class="slogan">${esc(p.slogan || "")}</li><li><a href="admin.html">${esc(t("admin_link"))}</a></li>`;
+    const setF = (id, txt, href) => { const el = $(id); if (!el) return; el.hidden = !txt; el.querySelector("span").textContent = txt || ""; if (href !== undefined) el.href = href; };
+    setF("#footAddr", p.adresse ? c(p, "adresse") : "", maps);
+    setF("#footHours", c(p, "horaires") || "");
+    setF("#footDelivery", p.livraison_active ? t("delivery_info", { min: nb(p.livraison_min ?? 10), max: money(p.livraison_max ?? 25) }) + (seuilOffert() ? " · " + t("free_delivery") + " ≥ " + money(seuilOffert()) : "") : "");
+    setF("#footWa", p.whatsapp ? "+" + String(p.whatsapp).replace(/\D/g, "").replace(/^(\d{3})(\d{3})(\d{3})(\d+)$/, "$1 $2 $3 $4") : "", wa);
+    $("#footName").textContent = shopName(); $("#footCity").textContent = (p.adresse || "").split(",").pop().trim();
+    $("#footYear").textContent = new Date().getFullYear();
+    $("#footLangs").innerHTML = Object.entries(L.LANGS).map(([k, v]) => `<button type="button" data-lang="${k}"${k === L.lang ? ' class="on"' : ""}>${esc(v.nom)}</button>`).join("");
 
     clearInterval(renderInfos._rot);
 
     const b = (data.bannieres || []).filter((x) => x.actif).sort((x, y) => (x.ordre || 0) - (y.ordre || 0));
-    const bh = b.map((x) => `<div class="banniere banniere-${esc(x.style || "blanc")}"><div class="banniere-icon">${esc(x.icone || "✨")}</div><div><h3>${esc(c(x, "titre"))}</h3>${c(x, "texte") ? `<p>${esc(c(x, "texte"))}</p>` : ""}</div></div>`).join("");
+    const bh = b.map((x) => `<div class="banniere banniere-${esc(x.style || "blanc")}"><div class="banniere-icon">${(() => { const m = String(x.icone || "").match(/^(\d+)(ᵉ|e|er|ᵉʳ)$/i); return m ? `<span class="n">${m[1]}</span><sup>${m[2].replace("ᵉʳ", "er").replace("ᵉ", "e")}</sup>` : esc(x.icone || "✨"); })()}</div><div><h3>${esc(c(x, "titre"))}</h3>${c(x, "texte") ? `<p>${esc(c(x, "texte"))}</p>` : ""}</div></div>`).join("");
     $("#bannieres").innerHTML = bh;
   }
 
@@ -133,7 +134,7 @@
   function renderAllerg() {
     const map = new Map();
     (data.produits || []).filter((p) => p.actif !== false).forEach((p) => allergTokens(p).forEach((tk) => { const k = normA(tk); if (k && !map.has(k)) { const lbl = tk.replace(/\s*\(.*?\)\s*/g, "").trim(); map.set(k, lbl.charAt(0).toUpperCase() + lbl.slice(1)); } }));
-    const html = map.size ? `<div class="fp-head"><b>${esc(t("without"))}</b>${sans.size ? `<button type="button" class="linkish" data-allerg-clear>${esc(t("dismiss"))}</button>` : ""}</div>${[...map.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, label]) => `<label class="fp-opt"><input type="checkbox" data-allerg="${esc(k)}"${sans.has(k) ? " checked" : ""}><span>${esc(label)}</span></label>`).join("")}<small>${esc(t("allergen_note"))}</small>` : "";
+    const html = map.size ? `<div class="fp-head"><b>${esc(t("without"))}</b>${sans.size ? `<button type="button" class="linkish" data-allerg-clear>${esc(t("dismiss"))}</button>` : ""}</div>${[...map.entries()].sort((a, b) => a[1].localeCompare(b[1])).map(([k, label]) => `<label class="fp-opt"><input type="checkbox" data-allerg="${esc(k)}"${sans.has(k) ? " checked" : ""}><span>${esc(label)}</span></label>`).join("")}<small>${esc(t("allergen_note"))}${sans.size ? " · " + esc(t("hidden_n", { n: (data.produits || []).filter((p) => p.actif !== false && !isSupp(p) && exclu(p)).length })) : ""}</small>` : "";
     $$("[data-filter-pop]").forEach((el) => { el.innerHTML = html; });
     $$("[data-filter-toggle]").forEach((b) => { b.hidden = !map.size; b.classList.toggle("on", sans.size > 0); const c0 = b.querySelector(".fcount"); c0.textContent = sans.size; c0.hidden = !sans.size; });
   }
@@ -150,7 +151,7 @@
     const dispoNow = visibles.filter((p) => p.suivre_stock && (p.stock || 0) > 0).sort((a, b) => (b.vedette ? 1 : 0) - (a.vedette ? 1 : 0));
     const vedette = !q ? dispoNow.find((p) => p.vedette) : null;
     const nbDispo = dispoNow.length;
-    $("#countMob").textContent = t("n_available", { n: nbDispo });
+    $("#featured").innerHTML = vedette ? featuredCard(vedette) : "";
 
     const sections = [];
     cats.forEach((cat) => {
@@ -163,15 +164,15 @@
     sections.forEach((s) => { s.avail = s.produits.filter(dispo); s.sold = s.produits.filter((p) => !dispo(p)); });
     sections.sort((a, b) => (b.avail.length ? 1 : 0) - (a.avail.length ? 1 : 0));
     const navHtml = sections.filter((s) => s.avail.length && !(s.avail.length === 1 && s.avail[0] === vedette && !s.sold.length)).map((s, i) => `<a href="#${s.id}" data-target="${s.id}"${i === 0 ? ' class="active"' : ""}>${esc(s.nom)}</a>`).join("");
-    $("#catnav").innerHTML = navHtml;
+    $("#catnav").innerHTML = `<a href="#vitrine" data-target="vitrine" class="active">${esc(t("all"))}</a>` + navHtml.replace(' class="active"', "");
 
     const main = $("#catalogue");
     if (!sections.length) { main.innerHTML = `<p class="empty">${q ? esc(t("no_match", { q: recherche })) : esc(t("catalogue_soon"))}</p>`; return; }
-    main.innerHTML = `<div class="head-count"><h2>${esc(t("n_available", { n: nbDispo }))}</h2></div>${vedette ? featuredCard(vedette) : ""}` + sections.map((s, i) => {
+    main.innerHTML = sections.map((s, i) => {
       const avail = s.avail, sold = s.sold;
       const seuleVedette = avail.length === 1 && avail[0] === vedette && !sold.length;
       return `<section class="section${i === 0 ? " first" : ""}${seuleVedette ? " only-featured" : ""}${avail.length ? "" : " no-stock"}" id="${s.id}">
-        <div class="section-head"><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div>
+        <div class="section-head"><div><h2>${esc(s.nom)}</h2>${s.sub ? `<p>${esc(s.sub)}</p>` : ""}</div><span class="section-count">${esc(t("n_desserts", { n: s.produits.length }))}</span></div>
         ${avail.length ? `<div class="grid">${avail.map((p) => carte(p, p === vedette)).join("")}</div>` : ""}
         ${sold.length ? `<details class="soldout"${avail.length ? "" : " open"}><summary>${esc(t("soldout_n", { n: sold.length }))}</summary><div class="grid">${sold.map((p) => carte(p)).join("")}</div></details>` : ""}
       </section>`;
@@ -186,30 +187,33 @@
       : `<button class="plus" data-plus="${p.id}" aria-label="${esc(t("add_named", { name: nomP(p) }))}">+</button>`;
   }
   function carte(p, isFeatured = false) {
-    const tabs = badgesHtml(p);
-    return `<article class="card${dispo(p) ? "" : " epuise"}${isFeatured ? " is-featured" : ""}${tabs ? " has-tabs" : ""}" data-id="${p.id}">
-      ${tabs}${photoHtml(p)}
+    return `<article class="card${dispo(p) ? "" : " epuise"}${isFeatured ? " is-featured" : ""}" data-id="${p.id}">
+      ${photoHtml(p)}
       <div class="card-body">
         <div class="card-title" data-open="${p.id}">${esc(nomP(p))}</div>
         ${c(p, "description") ? `<p class="card-desc">${esc(c(p, "description"))}</p>` : ""}
+        <div class="stock-line ${stockKind(p)}"><span class="dot"></span>${esc(stockTxt(p))}</div>
         <div class="card-foot">${priceHtml(p.prix, p.ancien_prix)}<span class="act">${actionHtml(p)}</span></div>
       </div>
     </article>`;
   }
+
   function featuredCard(p) {
     const q = cart[p.id] || 0;
-    const action = q > 0 ? actionHtml(p) : `<button class="btn btn-ink btn-sm" data-plus="${p.id}">${esc(t("add"))}</button>`;
-    const st = p.suivre_stock && (p.stock || 0) > 3 ? t("pieces_today", { n: p.stock }) : stockTxt(p);
-    const tabs = badgesHtml(p);
-    return `<article class="featured${tabs ? " has-tabs" : ""}" data-id="${p.id}">
-      ${tabs}${photoHtml(p, "", true)}
+    const action = q > 0 ? actionHtml(p) : `<button class="btn-add" data-plus="${p.id}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>${esc(t("add"))}</button>`;
+    const k = stockKind(p);
+    const stockBadge = p.suivre_stock ? `<span class="badge badge-stock ${k}"><span class="dot"></span>${esc(stockTxt(p))}</span>` : "";
+    const al = c(p, "allergenes");
+    return `<article class="featured" data-id="${p.id}">
+      <div class="featured-photo" data-open="${p.id}">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(nomP(p))}">` : `<div class="ph"><span>${esc(t("photo_soon"))}</span></div>`}<span class="badge badge-signature">${esc(t("signature"))}</span>${stockBadge}</div>
       <div class="featured-body">
         <div class="row"><h3 data-open="${p.id}">${esc(nomP(p))}</h3>${priceHtml(p.prix, p.ancien_prix)}</div>
         ${c(p, "description") ? `<p>${esc(c(p, "description"))}</p>` : ""}
-        <div class="foot"><span class="stock-inline ${stockKind(p)}">${esc(st)}</span><span class="act">${action}</span></div>
+        <div class="foot">${al ? `<span class="allerg-line">${esc(t("allergens_short"))} ${esc(al.toLowerCase())}</span>` : `<span></span>`}<span class="act">${action}</span></div>
       </div>
     </article>`;
   }
+
   function rowItem(p) {
     return `<div class="row-item" data-id="${p.id}">
       <div class="n" data-open="${p.id}"><b>${esc(nomP(p))}</b>${c(p, "description") ? `<small>${esc(c(p, "description"))}</small>` : ""}</div>
@@ -221,7 +225,7 @@
   function refreshCardActions(id) {
     const p = produit(id); if (!p) return;
     $$(`.card[data-id="${id}"] .act`).forEach((el) => { el.innerHTML = actionHtml(p); });
-    $$(`.featured[data-id="${id}"] .act`).forEach((el) => { const q = cart[p.id] || 0; el.innerHTML = q > 0 ? actionHtml(p) : `<button class="btn btn-ink btn-sm" data-plus="${p.id}">${esc(t("add"))}</button>`; });
+    $$(`.featured[data-id="${id}"] .act`).forEach((el) => { const q = cart[p.id] || 0; el.innerHTML = q > 0 ? actionHtml(p) : `<button class="btn-add" data-plus="${p.id}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>${esc(t("add"))}</button>`; });
   }
 
   // ---------- Panier ----------
@@ -287,6 +291,7 @@
     const lbl = $("#cartFab [data-i18n]"); if (lbl) lbl.textContent = t("order_cta");
     $("#cartN").textContent = n ? t("items_count", { n }) : "";
     $("#cartFab").classList.toggle("hidden", n === 0);
+    $("#cartTopCount").textContent = n; $("#cartTopTotal").textContent = n ? money(sousTotal()) : ""; $("#cartTop").classList.toggle("hidden", n === 0);
     if ($("#drawer").classList.contains("open")) renderDrawer();
   }
 
@@ -615,7 +620,7 @@
       document.getElementById(el.dataset.target)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   });
-  $("#cartFab").onclick = openDrawer;
+  $("#cartFab").onclick = openDrawer; $("#cartTop").onclick = openDrawer;
   $("#closeDrawer").onclick = closeDrawer;
   $("#overlay").onclick = closeDrawer;
   $("#modal").addEventListener("click", (e) => { if (e.target === $("#modal")) closeModal(); });
@@ -637,26 +642,15 @@
   $$("[data-filter-toggle]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); const pop = b.closest(".search-wrap").querySelector("[data-filter-pop]"); const open = pop.hidden; $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); pop.hidden = !open; }));
   document.addEventListener("click", (e) => { if (!e.target.closest(".search-wrap")) $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); });
 
-  // Mobile : la barre haute n'apparaît que lorsque le bloc logo est sorti de l'écran
-  const heroIo = new IntersectionObserver((entries) => { document.body.classList.toggle("hdr", !entries[0].isIntersecting); }, { rootMargin: "-40px 0px 0px 0px", threshold: 0 });
-  heroIo.observe($("#hero"));
-  // Recherche cachée : tirer la page vers le bas tout en haut (ou la loupe) la fait apparaître
-  const reveal = $("#searchReveal");
-  function openSearch(focus) { reveal.classList.add("open"); if (focus) setTimeout(() => $("#rechercheMob").focus(), 250); }
-  function closeSearch() { if (!recherche) reveal.classList.remove("open"); }
-  $("#searchToggle").onclick = () => { if (reveal.classList.contains("open")) { reveal.classList.remove("open"); } else { window.scrollTo({ top: 0, behavior: "smooth" }); openSearch(true); } };
-  let touchY = null;
-  document.addEventListener("touchstart", (e) => { touchY = window.scrollY <= 0 ? e.touches[0].clientY : null; }, { passive: true });
-  document.addEventListener("touchmove", (e) => { if (touchY !== null && window.scrollY <= 0 && e.touches[0].clientY - touchY > 70) { touchY = null; openSearch(true); } }, { passive: true });
-  document.addEventListener("wheel", (e) => { if (window.scrollY <= 0 && e.deltaY < -30) openSearch(false); }, { passive: true });
-  window.addEventListener("scroll", () => { if (window.scrollY > 260) closeSearch(); }, { passive: true });
+  $("#searchToggle").onclick = () => { const el = $("#rechercheMob"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.focus(), 300); };
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (b) { L.set(b.dataset.lang); applyStatic(); renderAll(); } });
 
   const io = new IntersectionObserver((entries) => {
-    entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"); if (a) $("#catnav").scrollTo({ left: a.offsetLeft - 20, behavior: "smooth" }); } });
+    entries.forEach((en) => { if (en.isIntersecting) { $$("[data-target]").forEach((a) => a.classList.toggle("active", a.dataset.target === en.target.id)); const a = $(".catnav a.active"), nav = $("#catnav"); if (a && nav && (a.offsetLeft < nav.scrollLeft || a.offsetLeft + a.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollTo({ left: Math.max(0, a.offsetLeft - 20), behavior: "smooth" }); } });
   }, { rootMargin: "-90px 0px -70% 0px" });
   const observeSections = () => $$(".section").forEach((s) => io.observe(s));
 
-  function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); $("#reassure").innerHTML = `<p class="reassure-line">${esc(t("footer_line"))}</p><ol class="steps">${t("steps").split(/\s*·\s*/).map((x) => x.replace(/^\s*\d+[.)]\s*/, "")).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join("")}</ol>`; }
+  function renderAll() { renderInfos(); renderAllerg(); renderCatalogue(); refreshCartUI(); observeSections(); renderPending(); }
 
   // ---------- Chargement ----------
   async function recharger() {
@@ -669,10 +663,15 @@
         else if (p.suivre_stock) { cart[id] = Math.min(cart[id], p.stock || 0); if (!cart[id]) delete cart[id]; }
       }
       saveCart();
+      try { localStorage.setItem("bianchi_cache", JSON.stringify(data)); } catch {}
+      $("#offlineBanner").hidden = true;
       applyStatic(); renderAll();
     } catch (e) {
       console.error(e);
-      $("#catalogue").innerHTML = `<p class="empty">${esc(t("load_error"))}</p>`;
+      let cache = null; try { cache = JSON.parse(localStorage.getItem("bianchi_cache") || "null"); } catch {}
+      if (!cache && window.BIANCHI_DEMO) cache = JSON.parse(JSON.stringify(window.BIANCHI_DEMO));
+      if (cache) { data = cache; bestSellerId = null; $("#offlineBanner").hidden = false; applyStatic(); renderAll(); }
+      else $("#catalogue").innerHTML = `<p class="empty">${esc(t("load_error"))}</p>`;
     }
   }
   applyStatic();
