@@ -642,7 +642,7 @@
   $$("[data-filter-toggle]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); const pop = b.closest(".search-wrap").querySelector("[data-filter-pop]"); const open = pop.hidden; $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); pop.hidden = !open; }));
   document.addEventListener("click", (e) => { if (!e.target.closest(".search-wrap")) $$("[data-filter-pop]").forEach((p0) => { p0.hidden = true; }); });
 
-  $("#searchToggle").onclick = () => { const el = $("#rechercheMob"); el.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el.focus(), 300); };
+  $("#searchToggle").onclick = () => { const wrap = $("#searchReveal"), el = $("#rechercheMob"), btn = $("#searchToggle"); const open = !wrap.classList.contains("open"); wrap.classList.toggle("open", open); btn.classList.toggle("active", open); btn.setAttribute("aria-expanded", open ? "true" : "false"); if (open) { window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(() => el.focus(), 250); } else if (recherche) { recherche = ""; $$("#recherche, #rechercheMob").forEach((o) => { o.value = ""; }); renderCatalogue(); } };
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-lang]"); if (b) { L.set(b.dataset.lang); applyStatic(); renderAll(); } });
 
   const io = new IntersectionObserver((entries) => {

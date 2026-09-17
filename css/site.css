@@ -492,3 +492,13 @@ html { overflow-x: clip; }
 .banniere .banniere-icon .n { display: block; line-height: 1; font-size: 18px; font-weight: 700; transform: translateY(-1px); }
 .banniere .banniere-icon sup { position: static; display: block; align-self: flex-start; margin: 2px 0 0 1px; font-size: 11px; line-height: 1; font-family: inherit; font-weight: 700; vertical-align: 0; }
 @media (min-width: 1024px) { .banniere .banniere-icon .n { font-size: 19px; } }
+
+/* Mobile : le texte d'intro (stock réel, WhatsApp) est placé en bas de page, avant le pied de page */
+.intro-bottom { margin: 0 0 8px; padding-bottom: 96px; font-size: 15px; line-height: 1.55; color: var(--intro); }
+@media (max-width: 1023px) { main#vitrine { padding-bottom: 36px; } }
+
+/* Mobile : la recherche est masquée par défaut, la loupe de la barre l'affiche ou la replie */
+.search-reveal { display: none; }
+.search-reveal.open { display: block; }
+@media (min-width: 1024px) { .search-reveal.open { display: none !important; } }
+#searchToggle.active { background: var(--gold); color: #fff; }
