@@ -124,7 +124,7 @@
     clearInterval(renderInfos._rot);
 
     const b = (data.bannieres || []).filter((x) => x.actif).sort((x, y) => (x.ordre || 0) - (y.ordre || 0));
-    const bh = b.map((x) => `<div class="banniere banniere-${esc(x.style || "blanc")}"><div class="banniere-icon">${esc(x.icone || "✨")}</div><div><h3>${esc(c(x, "titre"))}</h3>${c(x, "texte") ? `<p>${esc(c(x, "texte"))}</p>` : ""}</div></div>`).join("");
+    const bh = b.map((x) => `<div class="banniere banniere-${esc(x.style || "blanc")}"><div class="banniere-icon">${(() => { const m = String(x.icone || "").match(/^(\d+)(ᵉ|e|er|ᵉʳ)$/i); return m ? `<span class="n">${m[1]}</span><sup>${m[2].replace("ᵉʳ", "er").replace("ᵉ", "e")}</sup>` : esc(x.icone || "✨"); })()}</div><div><h3>${esc(c(x, "titre"))}</h3>${c(x, "texte") ? `<p>${esc(c(x, "texte"))}</p>` : ""}</div></div>`).join("");
     $("#bannieres").innerHTML = bh;
   }
 

@@ -486,3 +486,9 @@ html { overflow-x: clip; }
 .mention-row { align-items: flex-start; }
 .mention-row .status-pill { flex: none; margin-top: 2px; }
 .banniere-icon { display: inline-flex; align-items: center; justify-content: center; line-height: 1; font-variant-numeric: lining-nums; padding-bottom: 1px; }
+
+/* Rond « 4ᵉ » : le groupe chiffre + exposant est centré d'un bloc dans le rond, l'exposant est collé en haut à droite du chiffre */
+.banniere-icon { position: relative; padding: 0; }
+.banniere-icon .n { display: inline-block; line-height: 1; font-size: 18px; font-weight: 700; transform: translateY(-1px); }
+.banniere-icon sup { position: static; display: inline-block; align-self: flex-start; margin: 3px 0 0 1px; font-size: 8px; line-height: 1; font-family: var(--body); font-weight: 800; vertical-align: 0; }
+@media (min-width: 1024px) { .banniere-icon .n { font-size: 19px; } }
