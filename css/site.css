@@ -548,3 +548,6 @@ html[data-theme="dark"] .progress.done .bar span { background: var(--gold); }
 .credit { display: inline-flex; flex-wrap: wrap; column-gap: 6px; row-gap: 2px; align-items: baseline; }
 .credit-tag { font-style: italic; opacity: .75; white-space: nowrap; }
 @media (max-width: 480px) { .credit-tag { flex-basis: 100%; white-space: normal; } }
+
+/* Barre des catégories collante : elle couvre aussi les marges latérales, le texte de la page ne transparaît plus sur les bords */
+@media (max-width: 1023px) { .catnav { margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); } }
