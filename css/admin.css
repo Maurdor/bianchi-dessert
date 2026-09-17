@@ -158,3 +158,21 @@ body { background: var(--cream); }
 .item.dragging { opacity: .5; }
 .item .updown { display: inline-flex; gap: 2px; }
 .item .updown .icon-btn { width: 28px; height: 28px; font-size: 11px; }
+
+/* Mobile : ligne produit sur deux rangées (photo + texte, puis prix + actions), en-tête compact */
+@media (max-width: 640px) {
+  .item { flex-wrap: wrap; row-gap: 10px; padding: 12px; }
+  .item[data-pid] { display: grid; grid-template-columns: auto 56px minmax(0, 1fr); grid-template-areas: "drag thumb main" "price price actions"; column-gap: 12px; align-items: center; }
+  .item[data-pid] .drag { grid-area: drag; }
+  .item[data-pid] .item-thumb { grid-area: thumb; }
+  .item[data-pid] .item-main { grid-area: main; min-width: 0; }
+  .item-main b { font-size: 17px; }
+  .item[data-pid] .item-price { grid-area: price; }
+  .item[data-pid] .item-actions { grid-area: actions; justify-self: end; }
+  .item-actions { margin-inline-start: auto; }
+  .item .updown .icon-btn { width: 32px; height: 32px; }
+  .topbar-inner { gap: 8px; padding: 8px 12px; }
+  .topbar img { width: 32px; height: 32px; }
+  .topbar .title { font-size: 15px; white-space: nowrap; }
+  .topbar a, .topbar button.linkish { white-space: nowrap; padding: 6px 9px; font-size: 12px; }
+}
