@@ -211,3 +211,8 @@ body { background: var(--cream); }
 .amodal-card .field label { margin-bottom: 2px; }
 #cadrage .frame-box { margin-top: 6px; }
 #cadrage .frame-tools { margin-top: 10px; }
+
+/* Fenêtres : le panneau blanc du formulaire garde une marge intérieure, les champs ne touchent plus son bord */
+.amodal-card form.panel, .amodal-card .panel { padding: 18px 20px !important; border-radius: 14px; }
+.amodal-card h3 { margin: 0 4px; }
+@media (max-width: 640px) { .amodal-card form.panel, .amodal-card .panel { padding: 14px 14px !important; } }
