@@ -186,3 +186,20 @@ body { background: var(--cream); }
 .frame-box img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 .frame-tools { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 13px; color: var(--muted); max-width: 320px; }
 .frame-tools input[type=range] { flex: 1; accent-color: var(--gold); }
+
+/* Fenêtres de l'admin sur mobile : rien ne déborde, les aides de champ passent à la ligne, les boutons se replient */
+.amodal-card { overflow-x: hidden; }
+.amodal-card > *, .amodal-card .field, .amodal-card .panel { min-width: 0; }
+.amodal-card .field label { display: block; line-height: 1.35; overflow-wrap: anywhere; }
+.amodal-card .field label small { display: block; margin-top: 2px; }
+.amodal-card .field input, .amodal-card .field select, .amodal-card .field textarea { max-width: 100%; box-sizing: border-box; }
+.amodal-card .btn { white-space: normal; text-align: center; }
+.amodal-card .hint, .amodal-card .switch small, .amodal-card p { overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .amodal { padding: 10px; }
+  .amodal-card { padding: 16px 14px; max-height: 94vh; }
+  .amodal-card h3 { font-size: 22px; }
+  .img-pick { flex-wrap: wrap; }
+  .tr-box { padding: 0 10px; }
+  .form-actions .btn { flex: 1 1 auto; }
+}
